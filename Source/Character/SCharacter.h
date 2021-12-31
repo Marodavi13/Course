@@ -38,9 +38,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	USInteractionComponent* InteractionComponent;
 
-	UPROPERTY(EditAnywhere, Category="Projectile")
+	UPROPERTY(EditAnywhere, Category="Attack")
+	UAnimMontage* AttackAnimation;
+	
+	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<ASMagicProjectile> ProjectileClass;
 
+	FTimerHandle TimerHandlePrimaryAttack;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -50,7 +54,13 @@ protected:
 	virtual void MoveForward(float Value);
 	virtual void MoveRight(float Value);
 
+	/** Plays the montage that will perform the attack*/
+	void PrimaryAttack();
+
+	/** Performs the attack, shooting a projectile from its hand*/
 	void PerformPrimaryAttack();
-	void PerformPrimaryInteract();
+
+	/** Interacts with the closest Actor*/
+	void PrimaryInteract();
 
 };

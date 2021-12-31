@@ -83,6 +83,13 @@ void ASCharacter::MoveRight(float Value)
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
+void ASCharacter::PrimaryAttack()
+{
+	PlayAnimMontage(AttackAnimation);
+	GetWorldTimerManager().SetTimer(TimerHandlePrimaryAttack, this, &ASCharacter::PerformPrimaryAttack, 0.17f);
+		
+}
+
 void ASCharacter::PerformPrimaryAttack()
 {
 	const FVector HandLocation = GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
@@ -94,7 +101,7 @@ void ASCharacter::PerformPrimaryAttack()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParameters);
 }
 
-void ASCharacter::PerformPrimaryInteract()
+void ASCharacter::PrimaryInteract()
 {
 	InteractionComponent->Interact();
 }
@@ -111,8 +118,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ASCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ASCharacter::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ASCharacter::PerformPrimaryAttack);
-	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PerformPrimaryInteract);
+	PlayerInputComponent->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
 	
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
 }
