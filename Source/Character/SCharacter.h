@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Actor/Projectile/SProjectile.h"
+#include "Component/SAttributeComponent.h"
 #include "GameFramework/Character.h"
 
 #include "SCharacter.generated.h"
@@ -41,6 +42,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	USInteractionComponent* InteractionComponent;
 
+	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category="Components")
+	USAttributeComponent* AttributeComponent;
+	
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* AttackAnimation;
 	
