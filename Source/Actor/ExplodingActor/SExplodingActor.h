@@ -23,7 +23,7 @@ protected:
 	UStaticMeshComponent* Mesh;
 
 	/** The force component that will apply the impulse when hit*/
-	UPROPERTY(VisibleAnywhere, Category="Component")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
 	URadialForceComponent* RadialForceComponent;
 
 	/** The function that will be bound to the OnHit Callback*/

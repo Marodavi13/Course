@@ -1,4 +1,6 @@
 #include "SExplodingActor.h"
+
+#include "DrawDebugHelpers.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 ASExplodingActor::ASExplodingActor()
@@ -23,6 +25,10 @@ void ASExplodingActor::OnMeshHit(UPrimitiveComponent* HitComponent, AActor* Othe
 	FVector NormalImpulse, const FHitResult& Hit)
 {
 	RadialForceComponent->FireImpulse();
+	UE_LOG(LogTemp, Log, TEXT("Mesh has been hit in %s by %s"), *GetNameSafe(this), *GetNameSafe(OtherActor));
+
+	FString CombinedString = FString::Printf(TEXT("Hit at location: %s"), *Hit.ImpactPoint.ToString());
+	DrawDebugString(GetWorld(), Hit.ImpactPoint, CombinedString, nullptr, FColor::Green, 2.f, true);
 }
 
 void ASExplodingActor::PostInitializeComponents()

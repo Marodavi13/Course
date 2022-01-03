@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Actor/Projectile/SMagicProjectile.h"
+#include "Actor/Projectile/SProjectile.h"
 #include "GameFramework/Character.h"
 
 #include "SCharacter.generated.h"
@@ -11,6 +11,9 @@
 class USInteractionComponent;
 class UCameraComponent;
 class USpringArmComponent;
+
+DECLARE_DELEGATE_OneParam(FPrimaryAttack, int32 /**, Projectile Class index*/ )
+
 UCLASS()
 class COURSE_API ASCharacter : public ACharacter
 {
@@ -42,9 +45,10 @@ protected:
 	UAnimMontage* AttackAnimation;
 	
 	UPROPERTY(EditAnywhere, Category="Attack")
-	TSubclassOf<ASMagicProjectile> ProjectileClass;
-
+	TArray<TSubclassOf<ASProjectile>> ProjectileClasses;
+		
 	FTimerHandle TimerHandlePrimaryAttack;
+
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -55,10 +59,11 @@ protected:
 	virtual void MoveRight(float Value);
 
 	/** Plays the montage that will perform the attack*/
-	void PrimaryAttack();
+	void LaunchProjectile(int32 Index);
 
 	/** Performs the attack, shooting a projectile from its hand*/
-	void PerformPrimaryAttack();
+	void PerformLaunchProjectile(int32 Index);
+
 
 	/** Interacts with the closest Actor*/
 	void PrimaryInteract();
