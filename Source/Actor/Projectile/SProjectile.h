@@ -11,7 +11,7 @@ class UProjectileMovementComponent;
 class USphereComponent;
 class UParticleSystemComponent;
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract)
 class COURSE_API ASProjectile : public AActor
 {
 	GENERATED_BODY()
