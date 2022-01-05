@@ -19,7 +19,7 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, bFromSweep,
 	                            SweepResult);
 
-	if(!OtherActor || OtherActor == GetInstigator())
+	if(!OtherActor || OtherActor == GetInstigator() || OtherActor->GetInstigator() == GetInstigator())
 	{
 		return;
 	}
@@ -28,7 +28,7 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 
 	if(AttributeComponent)
 	{
-		AttributeComponent->ApplyHealthChange(Damage);
+		AttributeComponent->ApplyHealthChange(-Damage);
 	}
 
 	PlayExplodeEffects();

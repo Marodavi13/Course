@@ -17,7 +17,7 @@ class COURSE_API ASProjectileMagic : public ASProjectile
 public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="")
-	float Damage = -20.f;
+	float Damage = 20.f;
 	
 	virtual void BeginPlay() override;
 
