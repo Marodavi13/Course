@@ -7,6 +7,7 @@
 
 #include "SProjectile.generated.h"
 
+class USoundCue;
 class UProjectileMovementComponent;
 class USphereComponent;
 class UParticleSystemComponent;
@@ -19,7 +20,7 @@ class COURSE_API ASProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ASProjectile();
-	
+
 protected:
 	/** Collision */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
@@ -33,7 +34,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
 	UParticleSystemComponent* EffectComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Effects")
+	UParticleSystem* ImpactVFX;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
+	UAudioComponent* FlightAudioComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Effects")
+	USoundCue* ImpactSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Effects")
+	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Effects")
+	FVector2D CameraShakeRadius = FVector2D(0.f, 150.f);
+	
+	virtual void BeginPlay() override;
+	
 	virtual void PostInitializeComponents() override;
+
+	void PlayExplodeEffects() const;
 
 	UFUNCTION()
 	virtual void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
@@ -41,7 +61,7 @@ protected:
 
 	UFUNCTION()
 	virtual void OnSphereHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-		FVector NormalImpulse, const FHitResult& Hit) {}
+		FVector NormalImpulse, const FHitResult& Hit);
 	
 
 

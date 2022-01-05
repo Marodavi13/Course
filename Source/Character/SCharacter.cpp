@@ -11,6 +11,7 @@
 #include "Component/SInteractionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -138,6 +139,12 @@ void ASCharacter::PerformLaunchProjectile(int32 Index)
 		UE_LOG(LogTemp, Error, TEXT("Projectile classes in %s doesn't hav valid index %i"), *GetNameSafe(this), Index);
 		return;
 	}
+	
+	if(LaunchProjectileEffects.IsValidIndex(Index))
+	{
+		UGameplayStatics::SpawnEmitterAttached(LaunchProjectileEffects[Index],GetMesh(),TEXT("Muzzle_01"));
+	}
+	
 	GetWorld()->SpawnActor<AActor>(ProjectileClasses[Index], SpawnTransform, SpawnParameters);
 	
 }
@@ -145,6 +152,25 @@ void ASCharacter::PerformLaunchProjectile(int32 Index)
 void ASCharacter::PrimaryInteract()
 {
 	InteractionComponent->Interact();
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth,
+	float DeltaHealth)
+{
+	if(NewHealth < 0.f && DeltaHealth < 0.f)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
+		DisableInput(PlayerController);
+		SetActorEnableCollision(false);
+	}
+}
+
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AttributeComponent->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+
 }
 
 

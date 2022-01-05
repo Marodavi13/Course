@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	USInteractionComponent* InteractionComponent;
 
-	UPROPERTY(VisibleAnywhere, BLueprintReadOnly, Category="Components")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USAttributeComponent* AttributeComponent;
 	
 	UPROPERTY(EditAnywhere, Category="Attack")
@@ -50,12 +50,25 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category="Attack")
 	TArray<TSubclassOf<ASProjectile>> ProjectileClasses;
+
+	UPROPERTY(EditAnywhere, Category="Attack")
+	TArray<UParticleSystem*> LaunchProjectileEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
+	FLinearColor DamageMaterialColor = FLinearColor::Red;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
+	float DamageMaterialSpeed = 4.f;
 		
 	FTimerHandle TimerHandlePrimaryAttack;
 
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	/** Bind the component delegates here*/
+	virtual void PostInitializeComponents() override;
+
 	void DrawDebug() const;
 
 	/** Movement functions*/
@@ -67,9 +80,11 @@ protected:
 
 	/** Performs the attack, shooting a projectile from its hand*/
 	void PerformLaunchProjectile(int32 Index);
-
-
+	
 	/** Interacts with the closest Actor*/
 	void PrimaryInteract();
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float DeltaHealth);
 
 };

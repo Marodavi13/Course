@@ -6,8 +6,6 @@
 #include "Actor/Projectile/SProjectile.h"
 #include "SProjectileDash.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDashFinished);
-
 UCLASS()
 class COURSE_API ASProjectileDash : public ASProjectile
 {
@@ -17,9 +15,6 @@ public:
 	ASProjectileDash();
 
 protected:
-
-	UPROPERTY(BlueprintAssignable)
-	FOnDashFinished OnDashFinished;
 
 	UPROPERTY(EditAnywhere, Category="Dash")
 	float DashTime = 0.2f;

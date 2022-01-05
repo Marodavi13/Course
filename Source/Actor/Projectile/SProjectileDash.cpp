@@ -4,6 +4,7 @@
 #include "Actor/Projectile/SProjectileDash.h"
 
 #include "DrawDebugHelpers.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 ASProjectileDash::ASProjectileDash()
 {
@@ -11,15 +12,17 @@ ASProjectileDash::ASProjectileDash()
 
 void ASProjectileDash::PerformDash(FVector Location, FVector Normal)
 {
-	if(Location == FVector::ZeroVector)
+	if(ensure(GetInstigator()))
 	{
-		GetInstigator()->SetActorLocation(GetActorLocation());
+		if(Location == FVector::ZeroVector)
+		{
+			GetInstigator()->TeleportTo(GetActorLocation(), GetInstigator()->GetActorRotation());
+		}
+		else
+		{
+			GetInstigator()->TeleportTo(Location - Normal * 25.f, GetInstigator()->GetActorRotation());
+		}
 	}
-	else
-	{
-		GetInstigator()->SetActorLocation(Location - Normal * 25.f);
-	}
-	OnDashFinished.Broadcast();
 	Destroy();
 }
 
@@ -40,6 +43,11 @@ void ASProjectileDash::OnSphereHit(UPrimitiveComponent* HitComponent, AActor* Ot
 	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 5.f, 8, FColor::Orange, false, 2.f);
 
 	GetWorldTimerManager().ClearTimer(DashHandle);
-	
+
+	//Stop and disable collision
+	MovementComponent->StopMovementImmediately();
+	SetActorEnableCollision(false);
+
+	// Perform the teleport
 	PerformDash(Hit.ImpactPoint, Hit.ImpactNormal);
 }

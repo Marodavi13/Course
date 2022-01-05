@@ -29,8 +29,8 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	if(AttributeComponent)
 	{
 		AttributeComponent->ApplyHealthChange(Damage);
-
-		Destroy();
 	}
 
+	PlayExplodeEffects();
+	Destroy();
 }
