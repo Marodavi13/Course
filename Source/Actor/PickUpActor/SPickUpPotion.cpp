@@ -20,32 +20,37 @@ void ASPickUpPotion::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		if(AttributeComponent->ApplyHealthChange(HealAmount))
 		{
-			ActivatePickup();
+			HideAndCooldownPickUp();
 		}
 	}
-}
-
-void ASPickUpPotion::ActivatePickup()
-{
-	/** Hide the pick up and disable collision*/
-	ActivatePickUp(false);
-	FTimerHandle DummyHandle;
-
-	/** Wait until the activation time has elapsed */
-	GetWorldTimerManager().SetTimer(DummyHandle, FTimerDelegate::CreateUObject(this, &ASPickUpPotion::ActivatePickUp, true), ActivationTime, false);
 }
 
 // Called when the game starts or when spawned
 void ASPickUpPotion::BeginPlay()
 {
 	Super::BeginPlay();
-	ActivatePickup();
+	HideAndCooldownPickUp();
 }
 
-void ASPickUpPotion::ActivatePickUp(bool bIsVisible)
+void ASPickUpPotion::SetPickUpState(bool bIsActive)
 {
-	SetActorHiddenInGame(!bIsVisible);
-	SetActorEnableCollision(bIsVisible);
+	SetActorHiddenInGame(!bIsActive);
+	SetActorEnableCollision(bIsActive);
+}
+
+void ASPickUpPotion::ShowPickUp()
+{
+	SetPickUpState(true);
+}
+
+void ASPickUpPotion::HideAndCooldownPickUp()
+{
+	SetPickUpState(false);
+	FTimerHandle DummyHandle;
+
+	/** Wait until the activation time has elapsed */
+	GetWorldTimerManager().SetTimer(DummyHandle,this, &ASPickUpPotion::ShowPickUp, ActivationTime, false);
+
 }
 
 // Called every frame

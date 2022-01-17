@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Camera/CameraShakeBase.h"
 
 #include "SProjectile.generated.h"
 
@@ -11,6 +12,7 @@ class USoundCue;
 class UProjectileMovementComponent;
 class USphereComponent;
 class UParticleSystemComponent;
+class UCameraShakeBase;
 
 UCLASS(Abstract)
 class COURSE_API ASProjectile : public AActor

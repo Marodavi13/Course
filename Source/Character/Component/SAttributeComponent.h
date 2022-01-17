@@ -20,7 +20,13 @@ public:
 	
 	// Sets default values for this component's properties
 	USAttributeComponent();
-	
+
+	UFUNCTION(BlueprintPure, Category = "Attributes | Health")
+	bool IsFullHealth() const
+	{
+		return MaxHealth == Health;
+	}
+
 	UFUNCTION(BlueprintCallable, Category = "Attributes | Health")
 	bool ApplyHealthChange(float DeltaHealth);
 
@@ -29,7 +35,18 @@ public:
 	{
 		return Health > 0.f;
 	}
-	
+
+	UFUNCTION(BlueprintPure, Category = "Attributes | Health")
+	float GetCurrentHealth() const
+	{
+		return Health;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "Attributes | Health")
+	float GetMaxHealth() const
+	{
+		return MaxHealth;
+	}
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Health")

@@ -12,18 +12,21 @@ USAttributeComponent::USAttributeComponent()
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth)
 {
 	/**  Dont heal if we are Max health */
-	if(Health == MaxHealth && DeltaHealth >= 0.f)
+	if(IsFullHealth() && DeltaHealth >= 0.f)
 	{
 		return false;
 	}
+
+	const float PreviousHealth = Health;
 	
 	/** Set the health and clamp it*/
 	Health += DeltaHealth;
 	Health = FMath::Clamp(Health, 0.f, MaxHealth);
 
+	DeltaHealth = Health - PreviousHealth;
 	/** Broadcast the event */
 	OnHealthChanged.Broadcast(nullptr, this, Health, DeltaHealth);
 	
-	return true;
+	return DeltaHealth != 0.f;
 }
 

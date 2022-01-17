@@ -44,6 +44,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USAttributeComponent* AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere, Category="Attack")
+	FName AttackBoneName = TEXT("Muzzle_01");
 	
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* AttackAnimation;

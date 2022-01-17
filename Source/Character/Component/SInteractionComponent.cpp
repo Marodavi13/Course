@@ -10,6 +10,7 @@
 
 #include "DrawDebugHelpers.h"
 #include "Actor/Interface/SGameplayInterface.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
@@ -46,7 +47,17 @@ void USInteractionComponent::Interact() const
 	FVector EyeLocation;
 	FRotator EyeRotation;
 	GetOwner()->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-	const FVector End = EyeLocation + EyeRotation.Vector() * InteractionDistance;
+
+	UCameraComponent* Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FVector CenteredEyeLocation = EyeLocation;
+
+
+	float Dist = ((EyeLocation - CameraLocation) * Camera->GetForwardVector()).Size();
+	
+	CenteredEyeLocation = CameraLocation + Dist * Camera->GetForwardVector();
+
+	const FVector End = CenteredEyeLocation + EyeRotation.Vector() * InteractionDistance;
 
 	/** Initialize other variables*/
 	TArray<FHitResult> Hits;

@@ -91,6 +91,12 @@ void ASCharacter::LaunchProjectile(int32 Index)
 	if(ensureMsgf(ProjectileClasses.IsValidIndex(Index), TEXT("Projectile Classes Index %i not valid"), Index))
 	{
 		PlayAnimMontage(AttackAnimation);
+		
+		if(LaunchProjectileEffects.IsValidIndex(Index))
+		{
+			UGameplayStatics::SpawnEmitterAttached(LaunchProjectileEffects[Index],GetMesh(), AttackBoneName);
+		}
+			
 		const FTimerDelegate Delegate  = FTimerDelegate::CreateUObject(this, &ASCharacter::PerformLaunchProjectile, Index);
 		GetWorldTimerManager().SetTimer(TimerHandlePrimaryAttack, Delegate, 0.17, false);
 	}	
@@ -99,9 +105,9 @@ void ASCharacter::LaunchProjectile(int32 Index)
 void ASCharacter::PerformLaunchProjectile(int32 Index)
 {
 	/** Set locations */
-	const FVector HandLocation = GetMesh()->GetSocketLocation(TEXT("Muzzle_01"));
+	const FVector HandLocation = GetMesh()->GetSocketLocation(AttackBoneName);
 	const FVector StartLocation = CameraComponent->GetComponentLocation();
-	FVector EndLocation = CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 2000.f;
+	FVector EndLocation = CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000.f;
 
 	/** Set Line Trace variables*/
 	FHitResult Hit;
@@ -139,12 +145,7 @@ void ASCharacter::PerformLaunchProjectile(int32 Index)
 		UE_LOG(LogTemp, Error, TEXT("Projectile classes in %s doesn't hav valid index %i"), *GetNameSafe(this), Index);
 		return;
 	}
-	
-	if(LaunchProjectileEffects.IsValidIndex(Index))
-	{
-		UGameplayStatics::SpawnEmitterAttached(LaunchProjectileEffects[Index],GetMesh(),TEXT("Muzzle_01"));
-	}
-	
+
 	GetWorld()->SpawnActor<AActor>(ProjectileClasses[Index], SpawnTransform, SpawnParameters);
 	
 }

@@ -17,7 +17,7 @@ public:
 	ASPickUpPotion();
 
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
-	void ActivatePickup();
+
 protected:
 	UPROPERTY(EditAnywhere, Category= "Activation")
 	float ActivationTime = 10.f;
@@ -28,7 +28,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void ActivatePickUp(bool bIsVisible = true);
+	/** Shows or hides the actor enabling or disabling its collision*/
+	void SetPickUpState(bool bIsActive);
+
+	/** Called when the pick up is going to be visible and interactable*/
+	virtual void ShowPickUp();
+
+	/** Called when the pick up is going to be hidden and not interactable*/
+	virtual void HideAndCooldownPickUp();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
