@@ -33,12 +33,12 @@ void USBTService_CheckLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 	}
 
 	/** Return if no attributes*/
-	USAttributeComponent* AttributeComponent = AIPawn->FindComponentByClass<USAttributeComponent>();
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(AIPawn);
 	if(!AttributeComponent)
 	{
 		return;
 	}
 
 	/** Set the low health bool in the BB*/
-	Blackboard->SetValueAsBool(IsLowHealthKey.SelectedKeyName, AttributeComponent->GetCurrentHealth() > LowHealthThreshold);
+	Blackboard->SetValueAsBool(IsLowHealthKey.SelectedKeyName, AttributeComponent->GetCurrentHealth() < LowHealthThreshold);
 }

@@ -16,9 +16,9 @@ ASPickUpPotion::ASPickUpPotion()
 void ASPickUpPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
 	ISGameplayInterface::Interact_Implementation(InstigatorPawn);
-	if( USAttributeComponent* AttributeComponent = InstigatorPawn->FindComponentByClass<USAttributeComponent>())
+	if (USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(InstigatorPawn))
 	{
-		if(AttributeComponent->ApplyHealthChange(HealAmount))
+		if(AttributeComponent->ApplyHealthChange(HealAmount, InstigatorPawn))
 		{
 			HideAndCooldownPickUp();
 		}

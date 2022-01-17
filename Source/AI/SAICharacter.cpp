@@ -25,6 +25,8 @@ void ASAICharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponen
 {
 	if (Delta < 0.f)
 	{
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeOfHitParamName, GetWorld()->TimeSeconds);
+	
 		if(InstigatorActor != this)
 		{
 			SetTargetActor(InstigatorActor);
@@ -54,7 +56,7 @@ void ASAICharacter::PostInitializeComponents()
 	AttributeComponent->OnHealthChanged.AddDynamic(this, &ASAICharacter::OnHealthChanged);
 }
 
-void ASAICharacter::SetTargetActor(APawn* NewTarget)
+void ASAICharacter::SetTargetActor(AActor* NewTarget)
 {
 	AAIController* AIController = Cast<AAIController>(GetController());
 	if(!AIController)
@@ -66,7 +68,7 @@ void ASAICharacter::SetTargetActor(APawn* NewTarget)
 	if(BlackboardComponent->GetValueAsObject(TEXT("TargetActor")) != NewTarget)
 	{
 		BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), NewTarget);
-		DrawDebugString(GetWorld(), GetActorLocation(), TEXT("I have seen the player!"),nullptr, FColor::White, 2.f);
+		DrawDebugString(GetWorld(), GetActorLocation(), TEXT("I have detected the player!"),nullptr, FColor::White, 2.f);
 	}
 }
 

@@ -36,13 +36,13 @@ EBTNodeResult::Type USBTTask_Heal::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 		HealTarget = AIPawn;
 	}
 
-	USAttributeComponent* AttributeComponent = HealTarget->FindComponentByClass<USAttributeComponent>();
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(HealTarget);
 	if(!AttributeComponent)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	AttributeComponent->ApplyHealthChange(AttributeComponent->GetMaxHealth());
+	AttributeComponent->ApplyHealthChange(AttributeComponent->GetMaxHealth(), AIPawn);
 
 	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }

@@ -25,11 +25,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Attributes")
 	USAttributeComponent* AttributeComponent;
 
+	UPROPERTY(VisibleAnywhere, Category="Effects")
+	FName TimeOfHitParamName = TEXT("TimeOfHit");
+
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float Delta);
 
 	virtual void PostInitializeComponents() override;
-	void SetTargetActor(APawn* NewTarget);
+	void SetTargetActor(AActor* NewTarget);
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* PawnSeen);

@@ -29,7 +29,7 @@ void ASGameModeBase::SpawnBots()
 		for(TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
 		{
 			ASAICharacter* Bot = *It;
-			USAttributeComponent* AttributeComponent = Bot->FindComponentByClass<USAttributeComponent>();
+			USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Bot);
 			if(AttributeComponent && AttributeComponent->IsAlive())
 			{
 				++NumberOfBots;

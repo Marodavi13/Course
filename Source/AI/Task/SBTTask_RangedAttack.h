@@ -18,6 +18,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="AI")
 	TSubclassOf<AActor> ProjectileClass = nullptr;
+
+	UPROPERTY(EditAnywhere, Category="AI")
+	float MaxBulletSpread = 2.f;
 	
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

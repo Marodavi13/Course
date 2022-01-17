@@ -24,7 +24,7 @@ void ASDummyActor::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent
 {
 	if(DeltaHealth < 0.f)
 	{
-		Mesh->SetScalarParameterValueOnMaterials(TEXT("TimeToHit"), GetWorld()->TimeSeconds);
+		Mesh->SetScalarParameterValueOnMaterials(TEXT("TimeOfHit"), GetWorld()->TimeSeconds);
 	}
 }
 

@@ -9,7 +9,28 @@ USAttributeComponent::USAttributeComponent()
 
 }
 
-bool USAttributeComponent::ApplyHealthChange(float DeltaHealth)
+USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
+{
+	if(!FromActor)
+	{
+		return nullptr;
+	}
+
+	return FromActor->FindComponentByClass<USAttributeComponent>();
+}
+
+bool USAttributeComponent::IsActorAlive(AActor* Actor)
+{
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Actor);
+	if(!AttributeComponent)
+	{
+		return false;
+	}
+
+	return AttributeComponent->IsAlive();
+}
+
+bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor)
 {
 	/**  Dont heal if we are Max health */
 	if(IsFullHealth() && DeltaHealth >= 0.f)
@@ -25,7 +46,7 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth)
 
 	DeltaHealth = Health - PreviousHealth;
 	/** Broadcast the event */
-	OnHealthChanged.Broadcast(nullptr, this, Health, DeltaHealth);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, DeltaHealth);
 	
 	return DeltaHealth != 0.f;
 }

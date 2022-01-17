@@ -17,6 +17,13 @@ class COURSE_API USAttributeComponent : public UActorComponent
 public:
 	UPROPERTY(BlueprintAssignable, Category="Attributes | Health")
 	FOnHealthChanged OnHealthChanged;
+
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	static USAttributeComponent* GetAttributes(AActor* FromActor);
+
+	UFUNCTION(BlueprintPure, Category = "Attributes")
+	static bool IsActorAlive(AActor* Actor);
+
 	
 	// Sets default values for this component's properties
 	USAttributeComponent();
@@ -28,7 +35,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes | Health")
-	bool ApplyHealthChange(float DeltaHealth);
+	bool ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor);
 
 	UFUNCTION(BlueprintPure, Category = "Attributes | Health")
 	bool IsAlive() const

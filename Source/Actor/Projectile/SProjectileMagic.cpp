@@ -24,11 +24,11 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 		return;
 	}
 
-	USAttributeComponent* AttributeComponent = OtherActor->FindComponentByClass<USAttributeComponent>();
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(OtherActor);
 
 	if(AttributeComponent)
 	{
-		AttributeComponent->ApplyHealthChange(-Damage);
+		AttributeComponent->ApplyHealthChange(-Damage, GetInstigator());
 	}
 
 	PlayExplodeEffects();
