@@ -3,10 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/Component/SAttributeComponent.h"
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
+class USWorldUserWidget;
+class USAttributeComponent;
 class UPawnSensingComponent;
 UCLASS()
 class COURSE_API ASAICharacter : public ACharacter
@@ -28,6 +29,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Effects")
 	FName TimeOfHitParamName = TEXT("TimeOfHit");
 
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	UPROPERTY(Transient)
+	USWorldUserWidget* ActiveHealthBar;
+	
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float Delta);
 
