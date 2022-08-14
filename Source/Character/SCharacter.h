@@ -30,6 +30,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual FVector GetPawnViewLocation() const override;
+	
+	UFUNCTION(Exec)
+	void HealSelf(float Amount = 100.f);
+	
 protected:
 	/** Spring arm that links the camera to the Character*/
 	UPROPERTY(VisibleAnywhere, Category="Components")

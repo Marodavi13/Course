@@ -13,5 +13,11 @@ UCLASS()
 class COURSE_API USUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	static bool ApplyDamage(AActor* DamageInstigator, AActor* TargetActor, float DamageAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Gameplay")
+	static bool ApplyDirectionalDamage(AActor* DamageInstigator, AActor* TargetActor, float DamageAmount, const FHitResult& HitResult);
 };

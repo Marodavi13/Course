@@ -3,8 +3,10 @@
 
 #include "Actor/Projectile/SProjectileMagic.h"
 
+#include "Course.h"
 #include "Character/Component/SAttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "Utils/SUtils.h"
 
 void ASProjectileMagic::BeginPlay()
 {
@@ -18,19 +20,12 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 {
 	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, bFromSweep,
 	                            SweepResult);
+	RETURN_IF_NULL(OtherActor);
+	RETURN_IF_TRUE(OtherActor == GetInstigator());
+	RETURN_IF_TRUE(OtherActor->GetInstigator() == GetInstigator());
 
-	if(!OtherActor || OtherActor == GetInstigator() || OtherActor->GetInstigator() == GetInstigator())
-	{
-		return;
-	}
-
-	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(OtherActor);
-
-	if(AttributeComponent)
-	{
-		AttributeComponent->ApplyHealthChange(-Damage, GetInstigator());
-	}
-
+	bool bIsDamageApplied = USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult);	
+	
 	PlayExplodeEffects();
 	Destroy();
 }

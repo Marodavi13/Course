@@ -21,6 +21,10 @@ public:
 	
 	virtual void StartPlay() override;
 
+	UFUNCTION(Exec)
+	void KillAllAI();
+
+	virtual void OnActorKilled(AActor* KilledActor, AActor* KillInstigator);
 protected:
 	
 	UPROPERTY(EditAnywhere, Category="AI")
@@ -39,6 +43,9 @@ protected:
 	FTimerHandle SpawnBotsHandle;
 
 	virtual void SpawnBots();
+
+	UFUNCTION()
+	void RespawnPlayerElapsed(AController* RespawningController);
 
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type Arg);

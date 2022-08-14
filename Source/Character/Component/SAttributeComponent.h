@@ -54,6 +54,8 @@ public:
 	{
 		return MaxHealth;
 	}
+
+	bool Kill(AActor* Instigator);
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Health")

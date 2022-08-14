@@ -3,14 +3,15 @@
 
 #include "Character/Component/SInteractionComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-
-
-
-
-
-#include "DrawDebugHelpers.h"
 #include "Actor/Interface/SGameplayInterface.h"
 #include "Camera/CameraComponent.h"
+#include "Curves/CurveLinearColor.h"
+
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(
+	TEXT("su.Draw.Interaction"),
+	false,
+	TEXT("Draws interaction debug shapes"),
+	ECVF_Cheat);
 
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
@@ -64,22 +65,35 @@ void USInteractionComponent::Interact() const
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectQuery;
 	ObjectQuery.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
 	const TArray<AActor*> ActorsToIgnore;
-
+	float Radius = 25.f;
+	
 	/** Perform the sphere trace */
-	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), EyeLocation, End, 25.f, ObjectQuery,false,
+	bool bBlockingHit = UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), EyeLocation, End, Radius, ObjectQuery,false,
 	                                                 ActorsToIgnore,EDrawDebugTrace::ForDuration,Hits, true);
 
+	FColor LineColor = bBlockingHit? FColor::Green : FColor::Red;
+	bool bDrawDebug = CVarDebugDrawInteraction.GetValueOnGameThread();
+	
 	/** Search a Interactable interface and interact with the first result*/
-	for(const FHitResult& Hit: Hits)
+	for (const FHitResult& Hit: Hits)
 	{
-		if(AActor* HitActor = Hit.GetActor())
+		if (bDrawDebug)
 		{
-			if(HitActor->Implements<USGameplayInterface>())
-			{
-				ISGameplayInterface::Execute_Interact(HitActor, Cast<APawn>(GetOwner()));
-				break;
-			}
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.f);
 		}
+		
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && HitActor->Implements<USGameplayInterface>())
+		{
+			ISGameplayInterface::Execute_Interact(HitActor, Cast<APawn>(GetOwner()));
+			break;
+		}
+
+	}
+
+	if (bDrawDebug)
+	{
+		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.f,0, 2.f);
 	}
 }
 
