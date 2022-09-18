@@ -11,3 +11,5 @@
 #define RETURN_VALUE_IF_NULL(Object, Value)			if(Object == nullptr)		{ return Value; }
 #define RETURN_VALUE_IF_TRUE(Expression, Value)		if((Expression) == true)	{ return Value; }
 #define RETURN_VALUE_IF_FALSE(Expression, Value)	if((Expression) == false)	{ return Value; }
+
+DECLARE_LOG_CATEGORY_EXTERN(LogSCredits, Log, All);

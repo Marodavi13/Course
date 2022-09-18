@@ -6,6 +6,7 @@
 #include "Actor/Projectile/SProjectile.h"
 #include "Component/SAttributeComponent.h"
 #include "GameFramework/Character.h"
+#include "GAS/SActionComponent.h"
 
 #include "SCharacter.generated.h"
 
@@ -50,6 +51,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USAttributeComponent* AttributeComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	USActionComponent* ActionComponent;
+	
 	UPROPERTY(VisibleAnywhere, Category="Attack")
 	FName AttackBoneName = TEXT("Muzzle_01");
 	
@@ -95,4 +99,9 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float DeltaHealth);
 
+	UFUNCTION()
+	void SprintStart();
+
+	UFUNCTION()
+	void SprintStop();
 };

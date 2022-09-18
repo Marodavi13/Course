@@ -30,6 +30,7 @@ ASCharacter::ASCharacter()
 	AttributeComponent = CreateDefaultSubobject<USAttributeComponent>(TEXT("Attribute Component"));
 	bUseControllerRotationYaw = false;
 
+	ActionComponent = CreateDefaultSubobject<USActionComponent>(TEXT("Action Component"));
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
@@ -177,6 +178,16 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 	}
 }
 
+void ASCharacter::SprintStart()
+{
+	ActionComponent->StartActionByName(this, TEXT("Sprint"));
+}
+
+void ASCharacter::SprintStop()
+{
+	ActionComponent->StopActionByName(this, TEXT("Sprint"));
+}
+
 void ASCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -185,8 +196,6 @@ void ASCharacter::PostInitializeComponents()
 
 }
 
-
-// Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -206,6 +215,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	
 	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
+
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Pressed, this, &ASCharacter::SprintStart);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

@@ -56,6 +56,8 @@ void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 		UE_LOG(LogTemp, Log, TEXT("Respawning character %s in %i seconds"), *GetNameSafe(Player), RespawnDelay);
 		GetWorldTimerManager().SetTimer(RespawnHandle, Delegate, RespawnDelay, false);
 	}
+
+	OnActorKilledDelegate.Broadcast(KilledActor, KillInstigator);
 }
 
 void ASGameModeBase::SpawnBots()

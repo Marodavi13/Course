@@ -24,7 +24,7 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	RETURN_IF_TRUE(OtherActor == GetInstigator());
 	RETURN_IF_TRUE(OtherActor->GetInstigator() == GetInstigator());
 
-	bool bIsDamageApplied = USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult);	
+	USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult);	
 	
 	PlayExplodeEffects();
 	Destroy();

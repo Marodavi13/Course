@@ -11,12 +11,19 @@ class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
 class UCurveFloat;
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilledDelegate, AActor*, KilledActor, AActor*, KillInstigator);
 UCLASS()
 class COURSE_API ASGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
+
+	// Delegates
+	UPROPERTY(BlueprintAssignable, Category="Game")
+	FOnActorKilledDelegate OnActorKilledDelegate;
+	
 	ASGameModeBase();
 	
 	virtual void StartPlay() override;
@@ -38,7 +45,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category="AI")
 	float SpawnBotsDelay;
-
 	
 	FTimerHandle SpawnBotsHandle;
 

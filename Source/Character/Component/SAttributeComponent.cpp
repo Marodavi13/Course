@@ -42,7 +42,7 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor)
 {
-	RETURN_VALUE_IF_TRUE(GetOwner()->CanBeDamaged() && DeltaHealth < 0.f, false);
+	RETURN_VALUE_IF_TRUE(!GetOwner()->CanBeDamaged() && DeltaHealth < 0.f, false);
 
 	/**  Dont heal if we are Max health */
 	RETURN_VALUE_IF_TRUE(IsFullHealth() && DeltaHealth >= 0.f, false);

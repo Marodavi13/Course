@@ -3,6 +3,8 @@
 
 #include "Actor/PickUpActor/SPickUpPotion.h"
 
+#include "Course.h"
+#include "Character/SPlayerState.h"
 #include "Character/Component/SAttributeComponent.h"
 
 // Sets default values
@@ -15,48 +17,26 @@ ASPickUpPotion::ASPickUpPotion()
 
 void ASPickUpPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
-	ISGameplayInterface::Interact_Implementation(InstigatorPawn);
-	if (USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(InstigatorPawn))
+	Super::Interact_Implementation(InstigatorPawn);
+
+	// We can't use a potion with no attribute comp
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(InstigatorPawn);
+	RETURN_IF_NULL(AttributeComponent);
+	RETURN_IF_TRUE(AttributeComponent->IsFullHealth());
+
+	// If it is a player, check if it has enough credits
+	bool bCanInteractPotion = true;
+	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->Controller->PlayerState);
+	if (PlayerState)
 	{
-		if(AttributeComponent->ApplyHealthChange(HealAmount, InstigatorPawn))
-		{
-			HideAndCooldownPickUp();
-		}
+		bCanInteractPotion = PlayerState->DoCreditTransaction(-CreditsToInteract, true, TEXT("Purchase Potion"));
+	}
+	
+	RETURN_IF_FALSE(bCanInteractPotion);
+
+	// Apply health change if possible
+	if(AttributeComponent->ApplyHealthChange(HealAmount, InstigatorPawn))
+	{
+		HideAndCooldownPickUp();
 	}
 }
-
-// Called when the game starts or when spawned
-void ASPickUpPotion::BeginPlay()
-{
-	Super::BeginPlay();
-	HideAndCooldownPickUp();
-}
-
-void ASPickUpPotion::SetPickUpState(bool bIsActive)
-{
-	SetActorHiddenInGame(!bIsActive);
-	SetActorEnableCollision(bIsActive);
-}
-
-void ASPickUpPotion::ShowPickUp()
-{
-	SetPickUpState(true);
-}
-
-void ASPickUpPotion::HideAndCooldownPickUp()
-{
-	SetPickUpState(false);
-	FTimerHandle DummyHandle;
-
-	/** Wait until the activation time has elapsed */
-	GetWorldTimerManager().SetTimer(DummyHandle,this, &ASPickUpPotion::ShowPickUp, ActivationTime, false);
-
-}
-
-// Called every frame
-void ASPickUpPotion::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
