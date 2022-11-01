@@ -27,7 +27,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
+
 protected:
+
+	UPROPERTY(EditAnywhere, Category="Action")
+	TArray<TSubclassOf<USActionBase>> InitialActions;
 	
 	UPROPERTY(Transient, SkipSerialization, BlueprintReadOnly, Category="Action")
 	TArray<USActionBase*> Actions;

@@ -20,6 +20,11 @@ USActionComponent::USActionComponent()
 void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for (const auto ActionClass : InitialActions)
+	{
+		AddAction(ActionClass);
+	}
 }
 
 

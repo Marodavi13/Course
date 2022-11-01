@@ -91,69 +91,9 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y), Value);
 }
 
-// ReSharper disable once CppMemberFunctionMayBeConst
-void ASCharacter::LaunchProjectile(int32 Index)
+void ASCharacter::LaunchProjectile(FName ActionName)
 {
-	if(ensureMsgf(ProjectileClasses.IsValidIndex(Index), TEXT("Projectile Classes Index %i not valid"), Index))
-	{
-		PlayAnimMontage(AttackAnimation);
-		
-		if(LaunchProjectileEffects.IsValidIndex(Index))
-		{
-			UGameplayStatics::SpawnEmitterAttached(LaunchProjectileEffects[Index],GetMesh(), AttackBoneName);
-		}
-			
-		const FTimerDelegate Delegate  = FTimerDelegate::CreateUObject(this, &ASCharacter::PerformLaunchProjectile, Index);
-		GetWorldTimerManager().SetTimer(TimerHandlePrimaryAttack, Delegate, 0.17, false);
-	}	
-}
-
-void ASCharacter::PerformLaunchProjectile(int32 Index)
-{
-	/** Set locations */
-	const FVector HandLocation = GetMesh()->GetSocketLocation(AttackBoneName);
-	const FVector StartLocation = CameraComponent->GetComponentLocation();
-	FVector EndLocation = CameraComponent->GetComponentLocation() + CameraComponent->GetForwardVector() * 10000.f;
-
-	/** Set Line Trace variables*/
-	FHitResult Hit;
-	FCollisionObjectQueryParams ObjectQueryParams;
-	FCollisionQueryParams Params;
-	
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldStatic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldDynamic);
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_Pawn);
-	ObjectQueryParams.AddObjectTypesToQuery(ECollisionChannel::ECC_PhysicsBody);
-	
-	Params.AddIgnoredActor(this);
-	Params.bDebugQuery = true;
-
-	/**  Perform Line trace from camera */
-	bool bHit = GetWorld()->LineTraceSingleByObjectType(Hit, StartLocation, EndLocation, ObjectQueryParams, Params);
-
-	if (bHit)
-	{
-		EndLocation = Hit.ImpactPoint;
-	}
-	// DrawDebugDirectionalArrow(GetWorld(), HandLocation, EndLocation, 5.f, bHit ? FColor::Green : FColor::Red,
-	// 	false, 2.f, 0, 3.f);
-
-	/**  Set the transform based on the Hit Result*/
-	const FTransform SpawnTransform = FTransform((EndLocation - HandLocation).Rotation(), HandLocation);
-
-	/** Spawn the projectile */
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParameters.Instigator = this;
-
-	if(!ProjectileClasses.IsValidIndex(Index))
-	{
-		UE_LOG(LogTemp, Error, TEXT("Projectile classes in %s doesn't hav valid index %i"), *GetNameSafe(this), Index);
-		return;
-	}
-
-	GetWorld()->SpawnActor<AActor>(ProjectileClasses[Index], SpawnTransform, SpawnParameters);
-	
+	ActionComponent->StartActionByName(this, ActionName);
 }
 
 void ASCharacter::PrimaryInteract()
@@ -206,12 +146,15 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ASCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ASCharacter::AddControllerPitchInput);
 
-	PlayerInputComponent->BindAction<FPrimaryAttack>(TEXT("MagicProjectile"), IE_Pressed, this,
-		&ASCharacter::LaunchProjectile, 0);
-	PlayerInputComponent->BindAction<FPrimaryAttack>(TEXT("BlackHoleProjectile"), IE_Pressed, this,
-		&ASCharacter::LaunchProjectile, 1);
-	PlayerInputComponent->BindAction<FPrimaryAttack>(TEXT("DashProjectile"), IE_Pressed, this,
-		&ASCharacter::LaunchProjectile, 2);
+	FName MagicProjectileName = TEXT("MagicProjectile");
+	FName BlackHoleProjectileName = TEXT("BlackHoleProjectile");
+	FName DashProjectileName = TEXT("DashProjectile");
+	PlayerInputComponent->BindAction<FPrimaryAttack>(MagicProjectileName, IE_Pressed, this,
+		&ASCharacter::LaunchProjectile, MagicProjectileName);
+	PlayerInputComponent->BindAction<FPrimaryAttack>(BlackHoleProjectileName, IE_Pressed, this,
+		&ASCharacter::LaunchProjectile, BlackHoleProjectileName);
+	PlayerInputComponent->BindAction<FPrimaryAttack>(DashProjectileName, IE_Pressed, this,
+		&ASCharacter::LaunchProjectile, DashProjectileName);
 	
 	PlayerInputComponent->BindAction(TEXT("PrimaryInteract"), IE_Pressed, this, &ASCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);

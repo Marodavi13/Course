@@ -23,4 +23,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category="Action")
 	FName ActionName;
+
+	UFUNCTION(BlueprintPure, Category = "Action")
+	virtual UWorld* GetWorld() const override;
 };

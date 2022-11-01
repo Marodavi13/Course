@@ -14,7 +14,7 @@ class USInteractionComponent;
 class UCameraComponent;
 class USpringArmComponent;
 
-DECLARE_DELEGATE_OneParam(FPrimaryAttack, int32 /**, Projectile Class index*/ )
+DECLARE_DELEGATE_OneParam(FPrimaryAttack, FName /**, Projectile Action Name*/ )
 
 UCLASS()
 class COURSE_API ASCharacter : public ACharacter
@@ -54,27 +54,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	USActionComponent* ActionComponent;
 	
-	UPROPERTY(VisibleAnywhere, Category="Attack")
-	FName AttackBoneName = TEXT("Muzzle_01");
-	
-	UPROPERTY(EditAnywhere, Category="Attack")
-	UAnimMontage* AttackAnimation;
-	
-	UPROPERTY(EditAnywhere, Category="Attack")
-	TArray<TSubclassOf<ASProjectile>> ProjectileClasses;
-
-	UPROPERTY(EditAnywhere, Category="Attack")
-	TArray<UParticleSystem*> LaunchProjectileEffects;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
 	FLinearColor DamageMaterialColor = FLinearColor::Red;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Damage")
 	float DamageMaterialSpeed = 4.f;
-		
-	FTimerHandle TimerHandlePrimaryAttack;
-
-
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -88,10 +73,7 @@ protected:
 	virtual void MoveRight(float Value);
 
 	/** Plays the montage that will perform the attack*/
-	void LaunchProjectile(int32 Index);
-
-	/** Performs the attack, shooting a projectile from its hand*/
-	void PerformLaunchProjectile(int32 Index);
+	void LaunchProjectile(FName ActionName);
 	
 	/** Interacts with the closest Actor*/
 	void PrimaryInteract();
