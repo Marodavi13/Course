@@ -80,4 +80,6 @@ void USActionAttackProjectile::LaunchProjectile(ACharacter* Instigator)
 	SpawnParameters.Instigator = Instigator;
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParameters);
+
+	StopAction(Instigator);
 }

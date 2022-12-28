@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Actions/SActionBase.h"
 #include "Components/ActorComponent.h"
 #include "SActionComponent.generated.h"
@@ -28,8 +29,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Tags")
+	FGameplayTagContainer ActiveGameplayTags;
 protected:
-
+	
 	UPROPERTY(EditAnywhere, Category="Action")
 	TArray<TSubclassOf<USActionBase>> InitialActions;
 	

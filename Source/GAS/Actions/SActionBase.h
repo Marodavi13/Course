@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameplayTagContainer.h"
 #include "SActionBase.generated.h"
 
+class USActionComponent;
 /**
  * 
  */
@@ -16,6 +17,9 @@ class COURSE_API USActionBase : public UObject
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	bool CanStart(AActor* Instigator) const;
+	
+	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	void StartAction(AActor* Instigator);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
@@ -25,5 +29,23 @@ public:
 	FName ActionName;
 
 	UFUNCTION(BlueprintPure, Category = "Action")
+	bool IsActive() const;
+	
+	UFUNCTION(BlueprintPure, Category = "Action")
 	virtual UWorld* GetWorld() const override;
+
+protected:
+	
+	bool bIsActive = false;
+
+	// Tags added to owning actor when activated
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer GrantsTags;
+
+	// Action can only start if owner has none of these tags
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer BlockedTags;
+
+	USActionComponent* GetOwningComponent() const; 
+
 };
