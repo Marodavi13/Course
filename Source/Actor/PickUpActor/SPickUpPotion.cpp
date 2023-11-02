@@ -27,15 +27,14 @@ void ASPickUpPotion::Interact_Implementation(APawn* InstigatorPawn)
 	// If it is a player, check if it has enough credits
 	bool bCanInteractPotion = true;
 	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->Controller->PlayerState);
-	if (PlayerState)
-	{
-		bCanInteractPotion = PlayerState->DoCreditTransaction(-CreditsToInteract, true, TEXT("Purchase Potion"));
-	}
-	
+	RETURN_IF_NULL(PlayerState);
+
+	bCanInteractPotion = PlayerState->CanRemoveCredits(CreditsToInteract);
 	RETURN_IF_FALSE(bCanInteractPotion);
 
 	// Apply health change if possible
-	if(AttributeComponent->ApplyHealthChange(HealAmount, InstigatorPawn))
+	if (AttributeComponent->ApplyHealthChange(HealAmount, InstigatorPawn) &&
+		PlayerState->RemoveCredits(CreditsToInteract, TEXT("Picked up potion")))
 	{
 		HideAndCooldownPickUp();
 	}

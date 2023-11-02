@@ -15,7 +15,7 @@ struct FSCreditTransaction
 	int32 TransactionAmount = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Transaction")
-	FName Reason = TEXT("Transaction done");
+	FName Reason = TEXT("Unknown reason");
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Transaction")
 	float TimeOfTransaction = -1.f;
@@ -45,10 +45,15 @@ public:
 	int32 GetPlayerCredits() const { return PlayerCredits; }
 
 	// Does a credit transaction of delta quantity of credits
-	UFUNCTION(BlueprintCallable, Category = "Credits")
-	bool DoCreditTransaction(int32 DeltaCredits, bool bDoBottomCheck, FName Reason = TEXT("Unnespeciffic transaction"));
+	UFUNCTION(BlueprintCallable, Category="Credits")
+	void AddCredits(int32 AddedCredits, FName Reason = TEXT("Unnespeciffic transaction"));
 
-	bool CanDoCreditTransaction(int32 DeltaCredits) const;
+	UFUNCTION(BlueprintCallable, Category="Credits")
+	bool RemoveCredits(int32 RemovedCredits, FName Reason = TEXT("Unnespeciffic transaction"));
+
+
+	bool CanRemoveCredits(int32 RemovedCredits) const;
+	
 	
 protected:
 	UPROPERTY(EditAnywhere, Category="Credits")
@@ -63,7 +68,8 @@ protected:
 	UFUNCTION()
 	void OnActorKilled(AActor* KilledActor, AActor* KillInstigator);
 private:
+	bool DoCreditTransaction(FSCreditTransaction Transaction);
+
 	TArray<FSCreditTransaction> Transactions;
-	// Called every frame
 
 };

@@ -52,8 +52,6 @@ void USInteractionComponent::Interact() const
 	UCameraComponent* Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
 	FVector CameraLocation = Camera->GetComponentLocation();
 	FVector CenteredEyeLocation = EyeLocation;
-
-
 	float Dist = ((EyeLocation - CameraLocation) * Camera->GetForwardVector()).Size();
 	
 	CenteredEyeLocation = CameraLocation + Dist * Camera->GetForwardVector();

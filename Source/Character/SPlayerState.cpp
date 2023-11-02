@@ -23,39 +23,59 @@ void ASPlayerState::PostInitializeComponents()
 	}
 }
 
-bool ASPlayerState::DoCreditTransaction(int32 DeltaCredits, bool bDoBottomCheck, FName Reason)
+void ASPlayerState::AddCredits(int32 AddedCredits, FName Reason)
 {
+	ensure(AddedCredits >= 0.f);
+
 	FSCreditTransaction NewTransaction;
-	NewTransaction.TransactionAmount = DeltaCredits;
+	NewTransaction.TransactionAmount = AddedCredits;
 	NewTransaction.TimeOfTransaction = GetWorld()->GetTimeSeconds();
 	NewTransaction.Reason = Reason;
 
-	if (bDoBottomCheck && DeltaCredits < 0 && PlayerCredits < DeltaCredits)
-	{
-		NewTransaction.bWasTransactionSuccessful = false;
-		UE_LOG(LogSCredits, Log, TEXT("Actor %s tried to remove %i credits but he doesn't have enough!. Total Credits: %i"),
-									  *GetNameSafe(GetPawn()), -DeltaCredits, PlayerCredits);
-	}
-	else
-	{
-		NewTransaction.bWasTransactionSuccessful = true;
-		PlayerCredits += DeltaCredits;
-		
-		Transactions.Add(NewTransaction);
-
-		UE_LOG(LogSCredits, Log, TEXT("Actor %s has done a transaction of %i creadits due %s. Total Credits: %i"),
-			*GetNameSafe(GetPawn()), DeltaCredits, *Reason.ToString(), PlayerCredits);
-
-		OnCreditTransactionDone.Broadcast(NewTransaction);
-	}
-	
-	return NewTransaction.bWasTransactionSuccessful;
-
+	DoCreditTransaction(NewTransaction);
 }
 
-bool ASPlayerState::CanDoCreditTransaction(int32 DeltaCredits) const
+bool ASPlayerState::RemoveCredits(int32 RemovedCredits, FName Reason)
 {
-	return DeltaCredits >= 0.f || PlayerCredits + DeltaCredits >= 0 ;
+	ensure(RemovedCredits >= 0.f);
+	
+	FSCreditTransaction NewTransaction;
+	NewTransaction.TransactionAmount = -RemovedCredits;
+	NewTransaction.TimeOfTransaction = GetWorld()->GetTimeSeconds();
+	NewTransaction.Reason = Reason;
+	
+	return DoCreditTransaction(NewTransaction);
+}
+
+bool ASPlayerState::DoCreditTransaction(FSCreditTransaction Transaction)
+{
+	if(Transaction.TransactionAmount < 0 && PlayerCredits < Transaction.TransactionAmount)
+	{
+		Transaction.bWasTransactionSuccessful = false;
+		UE_LOG(LogSCredits, Log, TEXT("Actor %s tried to remove %i credits but he doesn't have enough!. Total Credits: %i"),
+								  *GetNameSafe(GetPawn()), -Transaction.TransactionAmount, PlayerCredits);
+		Transactions.Add(Transaction);
+		return false;
+	}
+
+	
+	Transaction.bWasTransactionSuccessful = true;
+	PlayerCredits += Transaction.TransactionAmount;
+	Transactions.Add(Transaction);
+
+	OnCreditTransactionDone.Broadcast(Transaction);
+
+	UE_LOG(LogSCredits, Log, TEXT("Actor %s has done a credit transaction of %i credits due %s. Total Credits: %i"),
+		*GetNameSafe(GetPawn()), Transaction.TransactionAmount, *Transaction.Reason.ToString(), PlayerCredits);
+
+	return true;
+}
+
+bool ASPlayerState::CanRemoveCredits(int32 RemovedCredits) const
+{
+	ensure(RemovedCredits >= 0.f);
+
+	return PlayerCredits >= RemovedCredits;
 }
 
 
@@ -69,10 +89,9 @@ void ASPlayerState::BeginPlay()
 void ASPlayerState::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 {
 	RETURN_IF_FALSE(KillInstigator == GetPawn());
-	DoCreditTransaction(CreditsPerKill, false, TEXT("Actor Killed"));
-
-	
+	AddCredits(CreditsPerKill, TEXT("Actor Killed"));
 }
+
 
 // Called every frame
 void ASPlayerState::Tick(float DeltaTime)
@@ -80,4 +99,5 @@ void ASPlayerState::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
+
 

@@ -14,7 +14,7 @@ void ASPickUpCoin::Interact_Implementation(APawn* InstigatorPawn)
 	ASPlayerState* PlayerState = Cast<ASPlayerState>(InstigatorPawn->Controller->PlayerState);
 	RETURN_IF_NULL(PlayerState);
 
-	PlayerState->DoCreditTransaction(CreditsOnInteract, false, TEXT("Coin Interaction"));
+	PlayerState->AddCredits(CreditsOnInteract, TEXT("Coin Interaction"));
 	HideAndCooldownPickUp();
 }
 
