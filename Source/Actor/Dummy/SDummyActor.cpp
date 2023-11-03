@@ -22,7 +22,7 @@ void ASDummyActor::PostInitializeComponents()
 void ASDummyActor::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth,
 	float DeltaHealth)
 {
-	if(DeltaHealth < 0.f)
+	if (DeltaHealth < 0.f)
 	{
 		Mesh->SetScalarParameterValueOnMaterials(TEXT("TimeOfHit"), GetWorld()->TimeSeconds);
 	}

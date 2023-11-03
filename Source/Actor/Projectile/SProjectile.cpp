@@ -49,22 +49,22 @@ void ASProjectile::PostInitializeComponents()
 
 void ASProjectile::PlayExplodeEffects() const
 {
-	if(!ensure(!IsPendingKill()))
+	if (!ensure(!IsPendingKill()))
 	{
 		return;
 	}
 	
-	if(ImpactVFX)
+	if (ImpactVFX)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
 	}
 
-	if(ImpactSound)
+	if (ImpactSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(),GetActorRotation());
 	}
 
-	if(ImpactCameraShake)
+	if (ImpactCameraShake)
 	{
 		UGameplayStatics::PlayWorldCameraShake(this, ImpactCameraShake, GetActorLocation(), CameraShakeRadius.X ,CameraShakeRadius.Y);
 	}

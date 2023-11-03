@@ -37,7 +37,7 @@ void USActionAttackProjectile::OnAttackDelayElapsed(ACharacter* Instigator)
 
 void USActionAttackProjectile::LaunchProjectile(ACharacter* Instigator)
 {
-	if(!Instigator || !ProjectileClass)
+	if (!Instigator || !ProjectileClass)
 	{
 		ensure(false);
 		StopAction(Instigator);

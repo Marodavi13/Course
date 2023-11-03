@@ -10,7 +10,7 @@ void ASProjectileBlackHole::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if(ShrinkingActors.Num())
+	if (ShrinkingActors.Num())
 	{
 		TArray<AActor*> ActorsToRemove;
 		for(AActor* ShrinkingActor : ShrinkingActors)
@@ -19,7 +19,7 @@ void ASProjectileBlackHole::Tick(float DeltaSeconds)
 			ShrinkingActor->SetActorScale3D(ShrinkingActor->GetActorScale3D() - ShrinkSpeed * DeltaSeconds);
 			FVector CurrentScale = ShrinkingActor->GetActorScale3D();
 
-			if(CurrentScale.GetMin() <= 0.f)
+			if (CurrentScale.GetMin() <= 0.f)
 			{
 				ActorsToRemove.Add(ShrinkingActor);
 			}
@@ -31,7 +31,7 @@ void ASProjectileBlackHole::Tick(float DeltaSeconds)
 			ShrunkActor->Destroy();
 		}
 
-		if(ShrinkingActors.Num() == 0 && bIsWaitingToBeDestroyed)
+		if (ShrinkingActors.Num() == 0 && bIsWaitingToBeDestroyed)
 		{
 			Destroy();
 		}
@@ -55,7 +55,7 @@ void ASProjectileBlackHole::PostInitializeComponents()
 void ASProjectileBlackHole::OnBlackHoleEffectFinish(UParticleSystemComponent* ComponentFinished)
 {
 	/** If I have shrinking actors, fast forward them until I have none and I can be destroyed*/
-	if(ShrinkingActors.Num())
+	if (ShrinkingActors.Num())
 	{
 		bIsWaitingToBeDestroyed = true;
 		ShrinkSpeed *= 4.f;

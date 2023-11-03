@@ -33,7 +33,7 @@ bool USActionBase::CanStart_Implementation(AActor* Instigator) const
 		return false;
 	}
 
-	if(IsActive())
+	if (IsActive())
 	{
 		return false;
 	}

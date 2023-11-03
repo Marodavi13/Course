@@ -13,28 +13,28 @@ void USBTService_CheckLowHealth::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 
 	/** Return if no Blackboard*/
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	if(!ensure(Blackboard))
+	if (!ensure(Blackboard))
 	{
 		return;
 	}
 
 	AAIController* AIController = OwnerComp.GetAIOwner();
 
-	if(!AIController)
+	if (!AIController)
 	{
 		return;
 	}
 
 	/** Retrun if no AI pawn*/
 	APawn* AIPawn = AIController->GetPawn();
-	if(!ensure(AIPawn))
+	if (!ensure(AIPawn))
 	{
 		return;
 	}
 
 	/** Return if no attributes*/
 	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(AIPawn);
-	if(!AttributeComponent)
+	if (!AttributeComponent)
 	{
 		return;
 	}

@@ -12,14 +12,14 @@ EBTNodeResult::Type USBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& O
 {
 	/** Get AI controller, return if nullptr*/
 	AAIController* AIController = OwnerComp.GetAIOwner();
-	if(!ensure(AIController))
+	if (!ensure(AIController))
 	{
 		return EBTNodeResult::Failed;
 	}
 	
 	/** Get AI character, return if nullptr*/
 	ACharacter* AICharacter = Cast<ACharacter>(AIController->GetPawn());
-	if(!AICharacter)
+	if (!AICharacter)
 	{
 		return EBTNodeResult::Failed;
 	}

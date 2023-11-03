@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "GAS/SActionComponent.h"
+#include "GAS/Actions/SActionEffectBase.h"
 #include "Utils/SUtils.h"
 
 void ASProjectileMagic::BeginPlay()
@@ -21,7 +22,7 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComponent, OtherBodyIndex, bFromSweep,
-	                            SweepResult);
+								SweepResult);
 	RETURN_IF_NULL(OtherActor);
 	RETURN_IF_TRUE(OtherActor == GetInstigator());
 	RETURN_IF_TRUE(OtherActor->GetInstigator() == GetInstigator());
@@ -29,19 +30,22 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	USActionComponent* ActionComponent = USActionComponent::Get(OtherActor);
 
 	// If parry, invert the velocity and don't destroy
-	if(ActionComponent && ActionComponent->ActiveGameplayTags.HasTag(ParryTag))
+	if (ActionComponent && ActionComponent->ActiveGameplayTags.HasTag(ParryTag))
 	{
 		MovementComponent->Velocity = -MovementComponent->Velocity;
-		if(APawn* OtherPawn = Cast<APawn>(OtherActor))
+		if (APawn* OtherPawn = Cast<APawn>(OtherActor))
 		{
 			SetInstigator(OtherPawn);
 		}
-
 		return;
 	}
 	
-	USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult);	
-	
-	PlayExplodeEffects();
-	Destroy();
+	if (USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
+	{
+		if(ActionComponent && OnDamageEffect)
+		{
+			ActionComponent->AddAction(GetInstigator(), OnDamageEffect);
+		}
+		Destroy();
+	}
 }

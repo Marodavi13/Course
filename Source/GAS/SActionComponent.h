@@ -23,13 +23,15 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	virtual void AddAction(TSubclassOf<USActionBase> AddedActionClass);
+	virtual void AddAction(AActor* Instigator, TSubclassOf<USActionBase> AddedActionClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StartActionByName(AActor* Instigator, FName ActionName);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
+
+	void RemoveAction(USActionBase* ActionToRemove);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Tags")
 	FGameplayTagContainer ActiveGameplayTags;

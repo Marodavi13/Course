@@ -10,7 +10,7 @@ void USWorldUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if(!IsValid(AttachedActor))
+	if (!IsValid(AttachedActor))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AttachedActor is no longer valid, removing widget"));
 		RemoveFromParent();
@@ -23,7 +23,7 @@ void USWorldUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTim
 		const float Scale = UWidgetLayoutLibrary::GetViewportScale(this);
 		ScreenPosition /= Scale;
 
-		if(ParentSizeBox)
+		if (ParentSizeBox)
 		{
 			ParentSizeBox->SetRenderTranslation(ScreenPosition);
 		}

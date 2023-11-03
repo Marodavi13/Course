@@ -16,6 +16,13 @@ class COURSE_API USActionBase : public UObject
 	GENERATED_BODY()
 
 public:
+		
+	UPROPERTY(EditAnywhere, Category="Action")
+	FName ActionName;
+
+	UPROPERTY(EditAnywhere, Category="Action")
+	bool bAutoStart = false;
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	bool CanStart(AActor* Instigator) const;
 	
@@ -24,9 +31,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Action")
 	void StopAction(AActor* Instigator);
-	
-	UPROPERTY(EditAnywhere, Category="Action")
-	FName ActionName;
 
 	UFUNCTION(BlueprintPure, Category = "Action")
 	bool IsActive() const;
@@ -46,6 +50,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
+	UFUNCTION(BlueprintCallable, Category="Action")
 	USActionComponent* GetOwningComponent() const; 
 
 };

@@ -12,9 +12,9 @@ ASProjectileDash::ASProjectileDash()
 
 void ASProjectileDash::PerformDash(FVector Location, FVector Normal)
 {
-	if(ensure(GetInstigator()))
+	if (ensure(GetInstigator()))
 	{
-		if(Location == FVector::ZeroVector)
+		if (Location == FVector::ZeroVector)
 		{
 			GetInstigator()->TeleportTo(GetActorLocation(), GetInstigator()->GetActorRotation());
 		}

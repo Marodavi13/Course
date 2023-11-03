@@ -28,7 +28,7 @@ void USActionComponent::BeginPlay()
 
 	for (const auto ActionClass : InitialActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 }
 
@@ -42,7 +42,7 @@ void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, DebugMessage);
 }
 
-void USActionComponent::AddAction(TSubclassOf<USActionBase> AddedActionClass)
+void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USActionBase> AddedActionClass)
 {
 	ensure(AddedActionClass);
 	RETURN_IF_NULL(AddedActionClass);
@@ -50,10 +50,13 @@ void USActionComponent::AddAction(TSubclassOf<USActionBase> AddedActionClass)
 	// Instanciate the action
 	USActionBase* AddedAction = NewObject<USActionBase>(this, AddedActionClass);
 	RETURN_IF_NULL(AddedAction);
-
 	
 	Actions.Add(AddedAction);
-
+	if (AddedAction->bAutoStart && ensure(AddedAction->CanStart(Instigator)))
+	{
+		AddedAction->StartAction(Instigator);
+	}
+	
 }
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
@@ -82,7 +85,7 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 
 bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 {
-	for(USActionBase* Action: Actions)
+	for (USActionBase* Action: Actions)
 	{
 		// I action not valid or not matching name, continue
 		if (!Action || Action->ActionName != ActionName || !Action->IsActive())
@@ -94,5 +97,13 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 		return true;
 	}
 	return false;
+}
+
+void USActionComponent::RemoveAction(USActionBase* ActionToRemove)
+{
+	RETURN_IF_NULL(ActionToRemove);
+	RETURN_IF_TRUE(ActionToRemove->IsActive());
+	
+	Actions.Remove(ActionToRemove);
 }
 

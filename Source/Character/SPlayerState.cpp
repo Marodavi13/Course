@@ -49,7 +49,7 @@ bool ASPlayerState::RemoveCredits(int32 RemovedCredits, FName Reason)
 
 bool ASPlayerState::DoCreditTransaction(FSCreditTransaction Transaction)
 {
-	if(Transaction.TransactionAmount < 0 && PlayerCredits < Transaction.TransactionAmount)
+	if (Transaction.TransactionAmount < 0 && PlayerCredits < Transaction.TransactionAmount)
 	{
 		Transaction.bWasTransactionSuccessful = false;
 		UE_LOG(LogSCredits, Log, TEXT("Actor %s tried to remove %i credits but he doesn't have enough!. Total Credits: %i"),

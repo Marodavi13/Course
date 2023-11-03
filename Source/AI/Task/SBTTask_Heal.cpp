@@ -11,33 +11,33 @@ EBTNodeResult::Type USBTTask_Heal::ExecuteTask(UBehaviorTreeComponent& OwnerComp
 {
 	/** Return if no Blackboard*/
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	if(!ensure(Blackboard))
+	if (!ensure(Blackboard))
 	{
 		return EBTNodeResult::Failed;
 	}
 	
 	/** Get AI controller, return if nullptr*/
 	AAIController* AIController = OwnerComp.GetAIOwner();
-	if(!ensure(AIController))
+	if (!ensure(AIController))
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	/** Get AI character, return if nullptr*/
 	APawn* AIPawn = Cast<APawn>(AIController->GetPawn());
-	if(!AIPawn)
+	if (!AIPawn)
 	{
 		return EBTNodeResult::Failed;
 	}
 
 	AActor* HealTarget = Cast<AActor>(Blackboard->GetValueAsObject(TargetToHeal.SelectedKeyName));
-	if(!HealTarget)
+	if (!HealTarget)
 	{
 		HealTarget = AIPawn;
 	}
 
 	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(HealTarget);
-	if(!AttributeComponent)
+	if (!AttributeComponent)
 	{
 		return EBTNodeResult::Failed;
 	}

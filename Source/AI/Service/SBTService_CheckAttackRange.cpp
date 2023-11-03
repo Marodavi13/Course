@@ -12,7 +12,7 @@ void USBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, u
 
 	/** Return if no Blackboard*/
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	if(!ensure(Blackboard))
+	if (!ensure(Blackboard))
 	{
 		return;
 	}
@@ -21,14 +21,14 @@ void USBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, u
 	AActor* Target = Cast<AActor>(Blackboard->GetValueAsObject(TEXT("TargetActor")));
 	AAIController* AIController = OwnerComp.GetAIOwner();
 
-	if(!Target || !AIController)
+	if (!Target || !AIController)
 	{
 		return;
 	}
 
 	/** Retrun if no AI pawn*/
 	APawn* AIPawn = AIController->GetPawn();
-	if(!ensure(AIPawn))
+	if (!ensure(AIPawn))
 	{
 		return;
 	}
@@ -37,7 +37,7 @@ void USBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, u
 	const float SquaredDistance = FVector::DistSquared(Target->GetActorLocation(), AIPawn->GetActorLocation());
 	bool bIsInRange = SquaredDistance < 2000.f * 2000.f;
 
-	if(bIsInRange)
+	if (bIsInRange)
 	{
 		bIsInRange = AIController->LineOfSightTo(Target);
 	}

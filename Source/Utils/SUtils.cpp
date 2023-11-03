@@ -23,7 +23,7 @@ bool USUtils::ApplyDirectionalDamage(AActor* DamageInstigator, AActor* TargetAct
 	
 	UPrimitiveComponent* HitComponent = HitResult.GetComponent();
 	const bool bIsSimulatingPhysics = HitComponent && HitComponent->IsSimulatingPhysics(HitResult.BoneName);
-	RETURN_VALUE_IF_FALSE(bIsSimulatingPhysics, false);
+	RETURN_VALUE_IF_FALSE(bIsSimulatingPhysics, true);
 
 	// Direction = Target - Origin
 	FVector Direction = HitResult.TraceEnd - HitResult.TraceStart;

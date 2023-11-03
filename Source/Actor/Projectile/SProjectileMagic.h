@@ -7,6 +7,7 @@
 #include "Actor/Projectile/SProjectile.h"
 #include "SProjectileMagic.generated.h"
 
+class USActionEffectBase;
 /**
  * 
  */
@@ -17,12 +18,15 @@ class COURSE_API ASProjectileMagic : public ASProjectile
 
 public:
 protected:
-	UPROPERTY(EditDefaultsOnly, Category="")
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
 	float Damage = 20.f;
 
-	UPROPERTY(EditDefaultsOnly, Category="")
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
 	FGameplayTag ParryTag;
 
+	UPROPERTY(EditDefaultsOnly, Category="Damage")
+	TSubclassOf<USActionEffectBase> OnDamageEffect;
+	
 	bool bHasBeenParried = false;
 	
 	virtual void BeginPlay() override;

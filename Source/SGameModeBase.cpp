@@ -54,7 +54,7 @@ void ASGameModeBase::KillAllAI()
 void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 {
 	ASCharacter* Player = Cast<ASCharacter>(KilledActor);
-	if(Player)
+	if (Player)
 	{
 		FTimerHandle RespawnHandle;
 		FTimerDelegate Delegate;
