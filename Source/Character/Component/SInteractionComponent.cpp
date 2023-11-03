@@ -4,8 +4,10 @@
 #include "Character/Component/SInteractionComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Actor/Interface/SGameplayInterface.h"
+#include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Curves/CurveLinearColor.h"
+#include "UI/SWorldUserWidget.h"
 
 static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(
 	TEXT("su.Draw.Interaction"),
@@ -23,6 +25,85 @@ USInteractionComponent::USInteractionComponent()
 	// ...
 }
 
+void USInteractionComponent::UpdateInteractWidget()
+{
+	if (FocusedActor)
+	{
+		if(!InteractWidget && ensure(InteractWidgetClass))
+		{
+			InteractWidget = CreateWidget<USWorldUserWidget>(GetWorld(), InteractWidgetClass);
+		}
+
+		if (InteractWidget)
+		{
+			InteractWidget->AttachedActor = FocusedActor;
+			
+			if(!InteractWidget->IsInViewport())
+			{
+				InteractWidget->AddToViewport();
+			}
+		}
+	}
+	else
+	{
+		if(InteractWidget)
+		{
+			InteractWidget->RemoveFromParent();
+		}
+	}
+}
+
+void USInteractionComponent::FindBestInteractable()
+{
+	/** Trace from eye location to where I am looking*/
+	FVector EyeLocation;
+	FRotator EyeRotation;
+	GetOwner()->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+
+	const FVector End = EyeLocation + EyeRotation.Vector() * InteractionDistance;
+
+	/** Initialize other variables*/
+	TArray<FHitResult> Hits;
+	const TArray<AActor*> ActorsToIgnore;
+
+	FCollisionObjectQueryParams QueryParams;
+	QueryParams.AddObjectTypesToQuery(CollisionChannel);
+	FCollisionShape Shape;
+	Shape.SetSphere(InteractionRadius);
+	
+	/** Perform the sphere trace */
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, QueryParams, Shape);
+
+
+	FColor LineColor = bBlockingHit? FColor::Green : FColor::Red;
+	bool bDrawDebug = CVarDebugDrawInteraction.GetValueOnGameThread();
+
+	//Clear ref before setting it again
+	FocusedActor= nullptr;
+	
+	/** Search a Interactable interface and interact with the first result*/
+	for (const FHitResult& Hit: Hits)
+	{
+		if (bDrawDebug)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, InteractionRadius, 32, LineColor, false, 2.f);
+		}
+		
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && HitActor->Implements<USGameplayInterface>())
+		{
+			FocusedActor = Hit.GetActor();
+			break;
+		}
+	}
+	
+	UpdateInteractWidget();
+	
+	if (bDrawDebug)
+	{
+		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.f,0, 2.f);
+	}
+}
 
 // Called when the game starts
 void USInteractionComponent::BeginPlay()
@@ -39,59 +120,18 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	FindBestInteractable();
 }
 
 void USInteractionComponent::Interact() const
 {
-	/** Trace from eye location to where I am looking*/
-	FVector EyeLocation;
-	FRotator EyeRotation;
-	GetOwner()->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-
-	UCameraComponent* Camera = GetOwner()->FindComponentByClass<UCameraComponent>();
-	FVector CameraLocation = Camera->GetComponentLocation();
-	FVector CenteredEyeLocation = EyeLocation;
-	float Dist = ((EyeLocation - CameraLocation) * Camera->GetForwardVector()).Size();
-	
-	CenteredEyeLocation = CameraLocation + Dist * Camera->GetForwardVector();
-
-	const FVector End = CenteredEyeLocation + EyeRotation.Vector() * InteractionDistance;
-
-	/** Initialize other variables*/
-	TArray<FHitResult> Hits;
-	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectQuery;
-	ObjectQuery.Add(UEngineTypes::ConvertToObjectType(ECC_WorldDynamic));
-	const TArray<AActor*> ActorsToIgnore;
-	float Radius = 25.f;
-	
-	/** Perform the sphere trace */
-	bool bBlockingHit = UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), EyeLocation, End, Radius, ObjectQuery,false,
-	                                                 ActorsToIgnore,EDrawDebugTrace::ForDuration,Hits, true);
-
-	FColor LineColor = bBlockingHit? FColor::Green : FColor::Red;
-	bool bDrawDebug = CVarDebugDrawInteraction.GetValueOnGameThread();
-	
-	/** Search a Interactable interface and interact with the first result*/
-	for (const FHitResult& Hit: Hits)
+	if (FocusedActor)
 	{
-		if (bDrawDebug)
-		{
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.f);
-		}
-		
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor && HitActor->Implements<USGameplayInterface>())
-		{
-			ISGameplayInterface::Execute_Interact(HitActor, Cast<APawn>(GetOwner()));
-			break;
-		}
-
+		ISGameplayInterface::Execute_Interact(FocusedActor, Cast<APawn>(GetOwner()));
 	}
-
-	if (bDrawDebug)
+	else
 	{
-		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.f,0, 2.f);
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Not focused actor to interact with"));
 	}
 }
 
