@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Actor/Projectile/SProjectile.h"
 #include "SProjectileMagic.generated.h"
 
@@ -18,6 +19,11 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, Category="")
 	float Damage = 20.f;
+
+	UPROPERTY(EditDefaultsOnly, Category="")
+	FGameplayTag ParryTag;
+
+	bool bHasBeenParried = false;
 	
 	virtual void BeginPlay() override;
 

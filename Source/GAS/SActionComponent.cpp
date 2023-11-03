@@ -15,6 +15,11 @@ USActionComponent::USActionComponent()
 	// ...
 }
 
+USActionComponent* USActionComponent::Get(const AActor* Owner)
+{
+	return Owner ? Owner->FindComponentByClass<USActionComponent>() : nullptr;
+}
+
 
 // Called when the game starts
 void USActionComponent::BeginPlay()

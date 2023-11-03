@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GAS/SActionComponent.h"
 #include "SAICharacter.generated.h"
 
 class USWorldUserWidget;
@@ -26,6 +27,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Attributes")
 	USAttributeComponent* AttributeComponent;
 
+	UPROPERTY(VisibleAnywhere, Category="Attributes")
+	USActionComponent* ActionComponent;
+	
 	UPROPERTY(VisibleAnywhere, Category="Effects")
 	FName TimeOfHitParamName = TEXT("TimeOfHit");
 

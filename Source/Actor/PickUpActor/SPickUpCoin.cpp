@@ -15,7 +15,7 @@ void ASPickUpCoin::Interact_Implementation(APawn* InstigatorPawn)
 	RETURN_IF_NULL(PlayerState);
 
 	PlayerState->AddCredits(CreditsOnInteract, TEXT("Coin Interaction"));
-	HideAndCooldownPickUp();
+	Destroy();
 }
 
 void ASPickUpCoin::NotifyActorBeginOverlap(AActor* OtherActor)

@@ -6,6 +6,8 @@
 #include "Course.h"
 #include "Character/Component/SAttributeComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "GAS/SActionComponent.h"
 #include "Utils/SUtils.h"
 
 void ASProjectileMagic::BeginPlay()
@@ -24,6 +26,20 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	RETURN_IF_TRUE(OtherActor == GetInstigator());
 	RETURN_IF_TRUE(OtherActor->GetInstigator() == GetInstigator());
 
+	USActionComponent* ActionComponent = USActionComponent::Get(OtherActor);
+
+	// If parry, invert the velocity and don't destroy
+	if(ActionComponent && ActionComponent->ActiveGameplayTags.HasTag(ParryTag))
+	{
+		MovementComponent->Velocity = -MovementComponent->Velocity;
+		if(APawn* OtherPawn = Cast<APawn>(OtherActor))
+		{
+			SetInstigator(OtherPawn);
+		}
+
+		return;
+	}
+	
 	USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult);	
 	
 	PlayExplodeEffects();

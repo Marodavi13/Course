@@ -10,6 +10,7 @@
 #include "Character/SCharacter.h"
 #include "Character/Component/SAttributeComponent.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "Kismet/GameplayStatics.h"
 
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(
@@ -28,6 +29,13 @@ void ASGameModeBase::StartPlay()
 	Super::StartPlay();
 
 	GetWorldTimerManager().SetTimer(SpawnBotsHandle, this, &ASGameModeBase::SpawnBots, SpawnBotsDelay, true);
+
+	for(int32 i = 0; i < InitialCoins; ++i)
+	{
+		SpawnCoin();
+	}
+	
+	GetWorldTimerManager().SetTimer(SpawnCoinsHandle, this, &ASGameModeBase::SpawnCoin, SpawnCoinsDelay, true);
 }
 
 void ASGameModeBase::KillAllAI()
@@ -63,8 +71,8 @@ void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 void ASGameModeBase::SpawnBots()
 {
 	RETURN_IF_FALSE(CVarSpawnBots.GetValueOnGameThread());
-	RETURN_IF_NULL(SpawnBotQuery);
 	ensure(SpawnBotQuery);
+	RETURN_IF_NULL(SpawnBotQuery);
 	
 	int32 NumberOfBots = 0;
 	for(TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
@@ -93,7 +101,7 @@ void ASGameModeBase::SpawnBots()
 	}
 	
 	UEnvQueryInstanceBlueprintWrapper* Wrapper = UEnvQueryManager::RunEQSQuery(this, SpawnBotQuery, this, EEnvQueryRunMode::RandomBest5Pct, nullptr);
-	Wrapper->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnQueryCompleted);
+	Wrapper->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnBotQueryCompleted);
 }
 
 void ASGameModeBase::RespawnPlayerElapsed(AController* RespawningController)
@@ -103,7 +111,7 @@ void ASGameModeBase::RespawnPlayerElapsed(AController* RespawningController)
 	RestartPlayer(RespawningController);
 }
 
-void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
+void ASGameModeBase::OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
 {
 	if (QueryStatus != EEnvQueryStatus::Success)
 	{
@@ -120,4 +128,53 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 		false, 10.f);
 	}
 	
+}
+
+void ASGameModeBase::OnCoinPickedUp(AActor* Actor)
+{
+	CoinInstances.Remove(Cast<ASPickUpCoin>(Actor));
+}
+
+void ASGameModeBase::OnCoinQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+                                          EEnvQueryStatus::Type QueryStatus)
+{
+	RETURN_IF_FALSE(QueryStatus == EEnvQueryStatus::Success)
+
+	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
+	ASPickUpCoin* SpawnedCoin = GetWorld()->SpawnActor<ASPickUpCoin>(CoinClass, Locations[0], FRotator::ZeroRotator);
+
+	SpawnedCoin->OnDestroyed.AddUniqueDynamic(this, &ASGameModeBase::OnCoinPickedUp);
+	CoinInstances.Add(SpawnedCoin);
+}
+
+void ASGameModeBase::SpawnCoin()
+{
+	ensure(SpawnCoinQuery);
+	RETURN_IF_NULL(SpawnCoinQuery);
+	ensure(CoinClass);
+	RETURN_IF_NULL(CoinClass);
+
+	RETURN_IF_TRUE(CoinInstances.Num() >= MaxNumberOfCoins);
+
+	UEnvQueryInstanceBlueprintWrapper* Wrapper = UEnvQueryManager::RunEQSQuery(this, SpawnCoinQuery, this, EEnvQueryRunMode::RandomBest25Pct, nullptr);
+	Wrapper->GetOnQueryFinishedEvent().AddDynamic(this, &ASGameModeBase::OnCoinQueryCompleted);
+}
+
+void ASGameModeBase::DisableAI()
+{
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(this, BotClass, OutActors);
+
+	for(AActor* Actor : OutActors)
+	{
+		USAttributeComponent* AttributeComp = USAttributeComponent::GetAttributes(Actor);
+		AttributeComp->Kill(this);
+	}
+
+	CVarSpawnBots->SetWithCurrentPriority(false);
+}
+
+void ASGameModeBase::EnableAI()
+{
+	CVarSpawnBots->SetWithCurrentPriority(true);
 }

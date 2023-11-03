@@ -18,6 +18,8 @@ public:
 	// Sets default values for this component's properties
 	USActionComponent();
 
+	static USActionComponent* Get(const AActor* Owner);
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Action")

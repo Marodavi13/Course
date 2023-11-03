@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/PickUpActor/SPickUpCoin.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
 #include "SGameModeBase.generated.h"
@@ -23,7 +24,8 @@ public:
 	// Delegates
 	UPROPERTY(BlueprintAssignable, Category="Game")
 	FOnActorKilledDelegate OnActorKilledDelegate;
-	
+	FTimerHandle SpawnCoinsHandle;
+
 	ASGameModeBase();
 	
 	virtual void StartPlay() override;
@@ -33,6 +35,22 @@ public:
 
 	virtual void OnActorKilled(AActor* KilledActor, AActor* KillInstigator);
 protected:
+	UPROPERTY(EditAnywhere, Category="Credits")
+	UEnvQuery* SpawnCoinQuery;
+
+	UPROPERTY(EditAnywhere, Category="Credits")
+	int32 InitialCoins = 4;
+
+	UPROPERTY(EditAnywhere, Category="Credits")
+	int32 MaxNumberOfCoins = 8;
+
+	UPROPERTY(EditAnywhere, Category="Credits")
+	float SpawnCoinsDelay = 10.f;
+
+	UPROPERTY(EditAnywhere, Category="Credits")
+	TSubclassOf<ASPickUpCoin> CoinClass;
+
+	TArray<TWeakObjectPtr<ASPickUpCoin>> CoinInstances;
 	
 	UPROPERTY(EditAnywhere, Category="AI")
 	UEnvQuery* SpawnBotQuery;
@@ -54,6 +72,17 @@ protected:
 	void RespawnPlayerElapsed(AController* RespawningController);
 
 	UFUNCTION()
-	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type Arg);
-	
+	void OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type Arg);
+
+	UFUNCTION()
+	void OnCoinPickedUp(AActor* Actor);
+	UFUNCTION()
+	void OnCoinQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+	void SpawnCoin();
+private:
+
+	UFUNCTION(Exec)
+	void DisableAI();
+	UFUNCTION(Exec)
+	void EnableAI();
 };
