@@ -6,8 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "SAttributeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, Instigator,
-	class USAttributeComponent*, OwningComponent, float, NewHealth, float, DeltaHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAttributeChanged, AActor*, Instigator,
+	class USAttributeComponent*, OwningComponent, float, NewValue, float, DeltaValue);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class COURSE_API USAttributeComponent : public UActorComponent
@@ -16,14 +16,16 @@ class COURSE_API USAttributeComponent : public UActorComponent
 
 public:
 	UPROPERTY(BlueprintAssignable, Category="Attributes | Health")
-	FOnHealthChanged OnHealthChanged;
+	FOnAttributeChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Attributes | Rage")
+	FOnAttributeChanged OnRageChanged;
 
 	UFUNCTION(BlueprintPure, Category = "Attributes")
 	static USAttributeComponent* GetAttributes(AActor* FromActor);
 
 	UFUNCTION(BlueprintPure, Category = "Attributes")
 	static bool IsActorAlive(AActor* Actor);
-
 	
 	// Sets default values for this component's properties
 	USAttributeComponent();
@@ -56,6 +58,21 @@ public:
 	}
 
 	bool Kill(AActor* Instigator);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes | Rage")
+	bool ApplyRageChange(float DeltaRage, AActor* InstigatorActor);
+
+	UFUNCTION(BlueprintPure, Category = "Attributes | Rage")
+	float GetCurrentRage() const
+	{
+		return Rage;
+	}
+
+	UFUNCTION(BlueprintPure, Category = "Attributes | Rage")
+	float GetMaxRage() const
+	{
+		return MaxRage;
+	}
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Health")
@@ -63,4 +80,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attributes | Health")
 	float MaxHealth = Health;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Attributes | Rage")
+	float Rage = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Rage", meta=(ClampMin = 0))
+	float RagePerHealthLost = 5.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Rage")
+	float MaxRage = 100.f;
 };

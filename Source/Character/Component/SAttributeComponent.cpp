@@ -63,12 +63,20 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* Instigat
 	/** Broadcast the event */
 	OnHealthChanged.Broadcast(InstigatorActor, this, Health, DeltaHealth);
 
-	// Has died?
-	if (DeltaHealth < 0.f && Health == 0.f)
+	if (DeltaHealth < 0.f)
 	{
-		ASGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ASGameModeBase>();
-		RETURN_VALUE_IF_NULL(GameMode, DeltaHealth != 0.f);
-		GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+		// Has died?
+		if (Health == 0.f)
+		{
+			ASGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ASGameModeBase>();
+			RETURN_VALUE_IF_NULL(GameMode, DeltaHealth != 0.f);
+			GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+		}
+		// if it has not died, increase the rage
+		else
+		{
+			ApplyRageChange(-DeltaHealth * RagePerHealthLost, InstigatorActor);
+		}
 	}
 	return DeltaHealth != 0.f;
 }
@@ -76,5 +84,21 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* Instigat
 bool USAttributeComponent::Kill(AActor* Instigator)
 {
 	return ApplyHealthChange(-GetMaxHealth(),Instigator);
+}
+
+bool USAttributeComponent::ApplyRageChange(float DeltaRage, AActor* InstigatorActor)
+{
+	RETURN_VALUE_IF_TRUE(DeltaRage == 0.f, false);
+	
+	const float OldRage = Rage;
+	
+	Rage += DeltaRage;
+	Rage = FMath::Clamp(Rage, 0.f, MaxRage);
+
+	// THis is the real change
+	DeltaRage = OldRage - Rage;
+	
+	OnRageChanged.Broadcast(InstigatorActor, this, Rage, DeltaRage);
+	return DeltaRage != 0;
 }
 
