@@ -3,6 +3,8 @@
 
 #include "Actor/Chest/SItemChest.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values
 ASItemChest::ASItemChest()
 {
@@ -14,10 +16,26 @@ ASItemChest::ASItemChest()
 	
 	UpperMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Upper Mesh"));
 	UpperMesh->SetupAttachment(BaseMesh);
+
+	bReplicates = true;
 }
 
 void ASItemChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	UpperMesh->SetRelativeRotation(FRotator(TargetPitch,0.f,0.f));
+	bIsLidOpen = !bIsLidOpen;
+	OnRep_IsLidOpen();
+}
+
+void ASItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASItemChest, bIsLidOpen);
+}
+
+void ASItemChest::OnRep_IsLidOpen()
+{
+	float WantedPitch = bIsLidOpen ? TargetPitch : 0.f;
+	UpperMesh->SetRelativeRotation(FRotator(WantedPitch,0.f,0.f));
 }
 

@@ -19,13 +19,24 @@ public:
 	ASItemChest();
 
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
+	
 	UPROPERTY(VisibleAnywhere, Category="Mesh")
 	UStaticMeshComponent* BaseMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Mesh")
 	UStaticMeshComponent* UpperMesh;
 
+	UPROPERTY(Transient, Replicated, ReplicatedUsing = "OnRep_IsLidOpen")
+	bool bIsLidOpen;
+
 	UPROPERTY(EditAnywhere, Category="Interaction")
 	float TargetPitch = 110.f;
+
+	UFUNCTION()
+	void OnRep_IsLidOpen();
+	
 };
+

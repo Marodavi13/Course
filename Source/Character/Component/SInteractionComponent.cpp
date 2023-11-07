@@ -2,6 +2,9 @@
 
 
 #include "Character/Component/SInteractionComponent.h"
+
+#include "Course.h"
+#include "ToolContextInterfaces.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Actor/Interface/SGameplayInterface.h"
 #include "Blueprint/UserWidget.h"
@@ -120,18 +123,27 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	APawn* OwnerPawn = GetOwner<APawn>();
+	RETURN_IF_NULL(OwnerPawn);
+	RETURN_IF_FALSE(OwnerPawn->IsLocallyControlled())
+
 	FindBestInteractable();
 }
 
-void USInteractionComponent::Interact() const
+void USInteractionComponent::Server_Interact_Implementation(AActor* InteractedActor)
 {
-	if (FocusedActor)
+	if (InteractedActor)
 	{
-		ISGameplayInterface::Execute_Interact(FocusedActor, Cast<APawn>(GetOwner()));
+		ISGameplayInterface::Execute_Interact(InteractedActor, Cast<APawn>(GetOwner()));
 	}
 	else
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("Not focused actor to interact with"));
 	}
+}
+
+void USInteractionComponent::Interact()
+{
+	Server_Interact(FocusedActor);
 }
 
