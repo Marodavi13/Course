@@ -30,6 +30,7 @@ protected:
 	virtual void ShowPickUp();
 
 	/** Called when the pick up is going to be hidden and not interactable*/
+	UFUNCTION(BlueprintCallable, Category="PickUp")
 	virtual void HideAndCooldownPickUp();
 
 };

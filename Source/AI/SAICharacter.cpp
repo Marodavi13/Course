@@ -75,6 +75,14 @@ void ASAICharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	PawnSensingComponent->OnSeePawn.AddDynamic(this, &ASAICharacter::OnPawnSeen);
 	AttributeComponent->OnHealthChanged.AddDynamic(this, &ASAICharacter::OnHealthChanged);
+
+	RETURN_IF_NULL(TargetSpottedClass);
+	
+	ActiveTargetSpotted = CreateWidget<USWorldUserWidget>(GetWorld(), TargetSpottedClass);
+	if (ActiveTargetSpotted)
+	{
+		ActiveTargetSpotted->AttachedActor = this;
+	}
 }
 
 void ASAICharacter::SetTargetActor(AActor* NewTarget)
@@ -86,10 +94,11 @@ void ASAICharacter::SetTargetActor(AActor* NewTarget)
 	}
 
 	UBlackboardComponent* BlackboardComponent = AIController->GetBlackboardComponent();
-	if (BlackboardComponent->GetValueAsObject(TEXT("TargetActor")) != NewTarget)
+	AActor* OldTarget = Cast<AActor>(BlackboardComponent->GetValueAsObject(TEXT("TargetActor")));
+	if (OldTarget != NewTarget)
 	{
 		BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), NewTarget);
-		DrawDebugString(GetWorld(), GetActorLocation(), TEXT("I have detected the player!"),nullptr, FColor::White, 2.f);
+		OnTargetActorChanged.Broadcast(NewTarget, OldTarget);
 	}
 }
 

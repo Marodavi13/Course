@@ -10,6 +10,9 @@
 class USWorldUserWidget;
 class USAttributeComponent;
 class UPawnSensingComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTargetChanged, AActor*, NewTarget, AActor*, OldTarget);
+
 UCLASS()
 class COURSE_API ASAICharacter : public ACharacter
 {
@@ -19,6 +22,8 @@ public:
 	// Sets default values for this character's properties
 	ASAICharacter();
 
+	UPROPERTY(BlueprintAssignable)
+	FOnTargetChanged OnTargetActorChanged;
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category="Sense")
@@ -36,9 +41,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="UI")
 	TSubclassOf<UUserWidget> HealthBarWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	TSubclassOf<USWorldUserWidget> TargetSpottedClass;
+	
 	UPROPERTY(Transient)
 	USWorldUserWidget* ActiveHealthBar;
-	
+
+	UPROPERTY(Transient)
+	USWorldUserWidget* ActiveTargetSpotted;
+
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float Delta);
 
