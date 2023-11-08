@@ -5,7 +5,7 @@
 
 #include "Course.h"
 #include "SGameModeBase.h"
-
+#include "Net/UnrealNetwork.h"
 
 static TAutoConsoleVariable<float> CVarDamageMultiplier(
 	TEXT("su.DamageMultiplier"),
@@ -16,7 +16,7 @@ static TAutoConsoleVariable<float> CVarDamageMultiplier(
 // Sets default values for this component's properties
 USAttributeComponent::USAttributeComponent()
 {
-
+	SetIsReplicatedByDefault(true);
 }
 
 USAttributeComponent* USAttributeComponent::GetAttributes(AActor* FromActor)
@@ -100,5 +100,16 @@ bool USAttributeComponent::ApplyRageChange(float DeltaRage, AActor* InstigatorAc
 	
 	OnRageChanged.Broadcast(InstigatorActor, this, Rage, DeltaRage);
 	return DeltaRage != 0;
+}
+
+void USAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USAttributeComponent, Health);
+	DOREPLIFETIME(USAttributeComponent, MaxHealth);
+	
+	DOREPLIFETIME(USAttributeComponent, Rage);
+	DOREPLIFETIME(USAttributeComponent, MaxRage);
 }
 

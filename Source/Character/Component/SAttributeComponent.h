@@ -15,6 +15,7 @@ class COURSE_API USAttributeComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	
 	UPROPERTY(BlueprintAssignable, Category="Attributes | Health")
 	FOnAttributeChanged OnHealthChanged;
 
@@ -73,20 +74,21 @@ public:
 	{
 		return MaxRage;
 	}
+
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Health")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes | Health")
 	float Health = 100.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attributes | Health")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Attributes | Health")
 	float MaxHealth = Health;
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category="Attributes | Rage")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category="Attributes | Rage")
 	float Rage = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Rage", meta=(ClampMin = 0))
 	float RagePerHealthLost = 5.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Attributes | Rage")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes | Rage")
 	float MaxRage = 100.f;
 };
