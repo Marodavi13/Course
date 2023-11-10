@@ -21,3 +21,17 @@
 #define RETURN_VALUE_IF_FALSE_ENSURE(Expression, Value)	if((Expression) == false)	{ ensure(false); return Value; }
 
 DECLARE_LOG_CATEGORY_EXTERN(LogSCredits, Log, All);
+
+static void LogOnScreen(UObject* WorldContext, FString Msg, FColor Color = FColor::Green, float Duration = 5.f)
+{
+	RETURN_IF_NULL_ENSURE(WorldContext);
+
+	UWorld* World = WorldContext->GetWorld();
+	RETURN_IF_NULL_ENSURE(World);
+
+	FString NetPrefix = World->IsNetMode(NM_Client) ? TEXT("[Client] ") : TEXT("[SERVER] ");
+	if(GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, Duration, Color, NetPrefix + Msg);
+	}
+}

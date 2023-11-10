@@ -35,12 +35,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category= "Tags")
 	FGameplayTagContainer ActiveGameplayTags;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 protected:
 	
 	UPROPERTY(EditAnywhere, Category="Action")
 	TArray<TSubclassOf<USActionBase>> InitialActions;
 	
-	UPROPERTY(Transient, SkipSerialization, BlueprintReadOnly, Category="Action")
+	UPROPERTY(Transient, SkipSerialization, BlueprintReadOnly, Replicated, Category="Action")
 	TArray<USActionBase*> Actions;
 	
 	virtual void BeginPlay() override;

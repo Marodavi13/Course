@@ -2,8 +2,9 @@
 
 
 #include "GAS/SActionComponent.h"
-
 #include "Course.h"
+#include "Engine/ActorChannel.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 USActionComponent::USActionComponent()
@@ -26,19 +27,33 @@ void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (const auto ActionClass : InitialActions)
+	if(GetOwner()->HasAuthority())
 	{
-		AddAction(GetOwner(), ActionClass);
-	}
-}
+		for (const auto ActionClass : InitialActions)
+		{
+			AddAction(GetOwner(), ActionClass);
+		}
+	}}
 
 // Called every frame
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	// const FString DebugMessage = GetNameSafe(GetOwner()) + TEXT(": ") + ActiveGameplayTags.ToStringSimple();
+	// GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, DebugMessage);
 
-	const FString DebugMessage = GetNameSafe(GetOwner()) + TEXT(": ") + ActiveGameplayTags.ToStringSimple();
-	GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, DebugMessage);
+	for (USActionBase* Action: Actions)
+	{
+		FColor Color = Action->IsActive() ? FColor::Blue : FColor::White;
+		
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action %s | IsActive: %s | Outer: %s"),
+			*GetNameSafe(GetOwner()),
+			*Action->ActionName.ToString(),
+			Action->IsActive()? TEXT("true") : TEXT("false"),
+			*GetNameSafe(Action->GetOuter()));
+		LogOnScreen(this, ActionMsg, Color, 0.0f);
+	}
 }
 
 void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USActionBase> AddedActionClass)
@@ -47,10 +62,12 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USActionBase> 
 	RETURN_IF_NULL(AddedActionClass);
 
 	// Instanciate the action
-	USActionBase* AddedAction = NewObject<USActionBase>(this, AddedActionClass);
+	USActionBase* AddedAction = NewObject<USActionBase>(GetOwner(), AddedActionClass);
 	RETURN_IF_NULL(AddedAction);
-	
+
+	AddedAction->Initialize(this);
 	Actions.Add(AddedAction);
+	
 	if (AddedAction->bAutoStart && ensure(AddedAction->CanStart(Instigator)))
 	{
 		AddedAction->StartAction(Instigator);
@@ -115,4 +132,26 @@ void USActionComponent::RemoveAction(USActionBase* ActionToRemove)
 void USActionComponent::Server_StartAction_Implementation(AActor* Instigator, FName ActionName)
 {
 	StartActionByName(Instigator, ActionName);
+}
+
+void USActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USActionComponent, Actions);
+}
+
+bool USActionComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+
+	for(USActionBase* Action : Actions)
+	{
+		if(Action)
+		{
+			bWroteSomething |= Channel->ReplicateSubobject(Action, *Bunch, *RepFlags);
+		}
+	}
+
+	return bWroteSomething;
 }

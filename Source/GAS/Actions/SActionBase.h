@@ -23,6 +23,11 @@ public:
 	UPROPERTY(EditAnywhere, Category="Action")
 	bool bAutoStart = false;
 
+	void Initialize(USActionComponent* NewOwningComponent);
+
+	UFUNCTION(BlueprintCallable, Category="Action")
+	USActionComponent* GetOwningComponent() const;
+	
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	bool CanStart(AActor* Instigator) const;
 	
@@ -38,10 +43,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Action")
 	virtual UWorld* GetWorld() const override;
 
-protected:
-	
-	bool bIsActive = false;
+	virtual bool IsSupportedForNetworking() const override
+	{
+		return true;
+	}
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	UPROPERTY(Transient, Replicated)
+	USActionComponent* OwningComponent;
+	
+	UPROPERTY(ReplicatedUsing="OnRep_IsActive")
+	bool bIsActive = false;
+	
+	UFUNCTION()
+	void OnRep_IsActive();
+	
 	// Tags added to owning actor when activated
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer GrantsTags;
@@ -49,8 +67,4 @@ protected:
 	// Action can only start if owner has none of these tags
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
-
-	UFUNCTION(BlueprintCallable, Category="Action")
-	USActionComponent* GetOwningComponent() const; 
-
 };
