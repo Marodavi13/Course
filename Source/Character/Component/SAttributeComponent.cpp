@@ -40,6 +40,11 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 	return AttributeComponent->IsAlive();
 }
 
+void USAttributeComponent::Multicast_HealthChanged_Implementation(AActor* Instigator, float NewHealth, float DeltaHealth)
+{
+	OnHealthChanged.Broadcast(Instigator, this, NewHealth, DeltaHealth);
+}
+
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor)
 {
 	RETURN_VALUE_IF_TRUE(!GetOwner()->CanBeDamaged() && DeltaHealth < 0.f, false);
@@ -61,7 +66,7 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* Instigat
 
 	DeltaHealth = Health - PreviousHealth;
 	/** Broadcast the event */
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, DeltaHealth);
+	Multicast_HealthChanged(InstigatorActor, Health, DeltaHealth);
 
 	if (DeltaHealth < 0.f)
 	{

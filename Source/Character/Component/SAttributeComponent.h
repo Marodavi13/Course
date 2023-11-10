@@ -91,4 +91,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category="Attributes | Rage")
 	float MaxRage = 100.f;
+
+	//Reliable because it handles dying logic
+	UFUNCTION(NetMulticast, Reliable) //TODO make unrealble once we move the die logic from SCharacter
+	void Multicast_HealthChanged(AActor* Instigator, float NewHealth, float DeltaHealth);
 };

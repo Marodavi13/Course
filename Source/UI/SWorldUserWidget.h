@@ -16,7 +16,7 @@ class COURSE_API USWorldUserWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn), Category = "UI")
 	AActor* AttachedActor;
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
