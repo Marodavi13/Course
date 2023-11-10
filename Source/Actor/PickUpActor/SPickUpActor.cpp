@@ -3,6 +3,8 @@
 
 #include "Actor/PickUpActor/SPickUpActor.h"
 
+#include "Net/UnrealNetwork.h"
+
 // Sets default values
 ASPickUpActor::ASPickUpActor()
 {
@@ -15,11 +17,26 @@ ASPickUpActor::ASPickUpActor()
 void ASPickUpActor::BeginPlay()
 {
 	Super::BeginPlay();
-	HideAndCooldownPickUp();
+	
+	if (HasAuthority())
+	{
+		HideAndCooldownPickUp();
+	}
+	else
+	{
+		SetPickUpState(false);
+	}
+}
+
+void ASPickUpActor::OnRep_CanBePickedUp()
+{
+	SetPickUpState(bCanBePickedUp);
 }
 
 void ASPickUpActor::SetPickUpState(bool bIsActive)
 {
+	bCanBePickedUp = bIsActive;
+	
 	SetActorHiddenInGame(!bIsActive);
 	SetActorEnableCollision(bIsActive);
 }
@@ -38,4 +55,10 @@ void ASPickUpActor::HideAndCooldownPickUp()
 	GetWorldTimerManager().SetTimer(DummyHandle,this, &ASPickUpActor::ShowPickUp, ActivationTime, false);
 }
 
+void ASPickUpActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ASPickUpActor, bCanBePickedUp);
+}
 

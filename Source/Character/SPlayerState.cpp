@@ -5,6 +5,7 @@
 
 #include "Course.h"
 #include "SGameModeBase.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ASPlayerState::ASPlayerState()
@@ -26,7 +27,9 @@ void ASPlayerState::PostInitializeComponents()
 void ASPlayerState::AddCredits(int32 AddedCredits, FName Reason)
 {
 	ensure(AddedCredits >= 0.f);
-
+	ensure(HasAuthority());
+	RETURN_IF_FALSE(HasAuthority());
+		
 	FSCreditTransaction NewTransaction;
 	NewTransaction.TransactionAmount = AddedCredits;
 	NewTransaction.TimeOfTransaction = GetWorld()->GetTimeSeconds();
@@ -38,7 +41,9 @@ void ASPlayerState::AddCredits(int32 AddedCredits, FName Reason)
 bool ASPlayerState::RemoveCredits(int32 RemovedCredits, FName Reason)
 {
 	ensure(RemovedCredits >= 0.f);
-	
+	ensure(HasAuthority());
+	RETURN_VALUE_IF_FALSE(HasAuthority(), false);
+
 	FSCreditTransaction NewTransaction;
 	NewTransaction.TransactionAmount = -RemovedCredits;
 	NewTransaction.TimeOfTransaction = GetWorld()->GetTimeSeconds();
@@ -57,13 +62,12 @@ bool ASPlayerState::DoCreditTransaction(FSCreditTransaction Transaction)
 		Transactions.Add(Transaction);
 		return false;
 	}
-
-	
+	float OldCredits = PlayerCredits;
 	Transaction.bWasTransactionSuccessful = true;
 	PlayerCredits += Transaction.TransactionAmount;
 	Transactions.Add(Transaction);
 
-	OnCreditTransactionDone.Broadcast(Transaction);
+	OnPlayerCreditsUpdated.Broadcast(PlayerCredits, OldCredits);
 
 	UE_LOG(LogSCredits, Log, TEXT("Actor %s has done a credit transaction of %i credits due %s. Total Credits: %i"),
 		*GetNameSafe(GetPawn()), Transaction.TransactionAmount, *Transaction.Reason.ToString(), PlayerCredits);
@@ -78,26 +82,25 @@ bool ASPlayerState::CanRemoveCredits(int32 RemovedCredits) const
 	return PlayerCredits >= RemovedCredits;
 }
 
-
-// Called when the game starts or when spawned
-void ASPlayerState::BeginPlay()
+void ASPlayerState::OnRep_PlayerCredits(int32 OldValue)
 {
-	Super::BeginPlay();
-	
+	OnPlayerCreditsUpdated.Broadcast(PlayerCredits, OldValue);
 }
 
 void ASPlayerState::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 {
 	RETURN_IF_FALSE(KillInstigator == GetPawn());
-	AddCredits(CreditsPerKill, TEXT("Actor Killed"));
+
+	if(HasAuthority())
+	{
+		AddCredits(CreditsPerKill, TEXT("Actor Killed"));
+	}
 }
 
-
-// Called every frame
-void ASPlayerState::Tick(float DeltaTime)
+// REPLICATION FUNCS
+void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::Tick(DeltaTime);
-
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ASPlayerState, PlayerCredits);
 }
-
-

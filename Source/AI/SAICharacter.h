@@ -24,6 +24,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnTargetChanged OnTargetActorChanged;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category="Sense")
@@ -50,6 +52,12 @@ protected:
 	UPROPERTY(Transient)
 	USWorldUserWidget* ActiveTargetSpotted;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, ReplicatedUsing="OnRep_TargetActor")
+	AActor* TargetActor;
+
+	UFUNCTION()
+	void OnRep_TargetActor(AActor* OldTarget);
+	
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComponent, float NewHealth, float Delta);
 

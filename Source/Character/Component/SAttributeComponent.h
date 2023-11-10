@@ -59,7 +59,7 @@ public:
 	}
 
 	bool Kill(AActor* Instigator);
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Attributes | Rage")
 	bool ApplyRageChange(float DeltaRage, AActor* InstigatorActor);
 
@@ -95,4 +95,8 @@ protected:
 	//Reliable because it handles dying logic
 	UFUNCTION(NetMulticast, Reliable) //TODO make unrealble once we move the die logic from SCharacter
 	void Multicast_HealthChanged(AActor* Instigator, float NewHealth, float DeltaHealth);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_RageChanged(AActor* Instigator, float NewRage, float DeltaRage);
+
 };

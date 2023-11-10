@@ -16,6 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	ASPickUpActor();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -23,6 +24,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category= "Activation")
 	float ActivationTime = 10.f;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, ReplicatedUsing="OnRep_CanBePickedUp", Category= "Activation")
+	bool bCanBePickedUp = false;
+
+	UFUNCTION()
+	void OnRep_CanBePickedUp();
+	
 	/** Shows or hides the actor enabling or disabling its collision*/
 	void SetPickUpState(bool bIsActive);
 

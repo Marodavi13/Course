@@ -43,5 +43,8 @@ protected:
 	UPROPERTY(Transient, SkipSerialization, BlueprintReadOnly, Category="Action")
 	TArray<USActionBase*> Actions;
 	
-	virtual void BeginPlay() override;	
+	virtual void BeginPlay() override;
+
+	UFUNCTION(Server, Reliable)
+	void Server_StartAction(AActor* Instigator, FName ActionName);
 };

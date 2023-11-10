@@ -24,7 +24,7 @@ struct FSCreditTransaction
 	bool bWasTransactionSuccessful = true;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSOnCreditTransactionDone, FSCreditTransaction, Transaction);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSOnCreditTransactionDone, int32, NewAmount,  int32, OldAmount);
 
 UCLASS()
 class COURSE_API ASPlayerState : public APlayerState
@@ -33,15 +33,13 @@ class COURSE_API ASPlayerState : public APlayerState
 	
 public:
 	UPROPERTY(BlueprintAssignable, Category="Delegates")
-	FSOnCreditTransactionDone OnCreditTransactionDone;
+	FSOnCreditTransactionDone OnPlayerCreditsUpdated;
 	
 	// Sets default values for this actor's properties
 	ASPlayerState();
 		
 	virtual void PostInitializeComponents() override;
 	
-	virtual void Tick(float DeltaTime) override;
-
 	int32 GetPlayerCredits() const { return PlayerCredits; }
 
 	// Does a credit transaction of delta quantity of credits
@@ -50,26 +48,28 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Credits")
 	bool RemoveCredits(int32 RemovedCredits, FName Reason = TEXT("Unnespeciffic transaction"));
-
-
+	
 	bool CanRemoveCredits(int32 RemovedCredits) const;
-	
-	
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
+	
 	UPROPERTY(EditAnywhere, Category="Credits")
 	int32 CreditsPerKill = 10;
 	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Credits")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, ReplicatedUsing="OnRep_PlayerCredits", Category="Credits")
 	int32 PlayerCredits = 0;
+
+	UFUNCTION()
+	void OnRep_PlayerCredits(int32 OldValue);
 	
 	UFUNCTION()
 	void OnActorKilled(AActor* KilledActor, AActor* KillInstigator);
+	
 private:
+
 	bool DoCreditTransaction(FSCreditTransaction Transaction);
-
+	
 	TArray<FSCreditTransaction> Transactions;
-
 };

@@ -11,6 +11,7 @@
 #include "Character/Component/SAttributeComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Perception/PawnSensingComponent.h"
 #include "UI/SWorldUserWidget.h"
 
@@ -97,6 +98,7 @@ void ASAICharacter::SetTargetActor(AActor* NewTarget)
 	AActor* OldTarget = Cast<AActor>(BlackboardComponent->GetValueAsObject(TEXT("TargetActor")));
 	if (OldTarget != NewTarget)
 	{
+		TargetActor = NewTarget;
 		BlackboardComponent->SetValueAsObject(TEXT("TargetActor"), NewTarget);
 		OnTargetActorChanged.Broadcast(NewTarget, OldTarget);
 	}
@@ -105,4 +107,15 @@ void ASAICharacter::SetTargetActor(AActor* NewTarget)
 void ASAICharacter::OnPawnSeen(APawn* SeenPawn)
 {
 	SetTargetActor(SeenPawn);
+}
+
+void ASAICharacter::OnRep_TargetActor(AActor* OldTarget)
+{
+	OnTargetActorChanged.Broadcast(TargetActor, OldTarget);
+}
+
+void ASAICharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASAICharacter, TargetActor);
 }

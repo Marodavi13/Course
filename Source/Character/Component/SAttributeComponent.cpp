@@ -40,15 +40,13 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 	return AttributeComponent->IsAlive();
 }
 
-void USAttributeComponent::Multicast_HealthChanged_Implementation(AActor* Instigator, float NewHealth, float DeltaHealth)
-{
-	OnHealthChanged.Broadcast(Instigator, this, NewHealth, DeltaHealth);
-}
 
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor)
 {
 	RETURN_VALUE_IF_TRUE(!GetOwner()->CanBeDamaged() && DeltaHealth < 0.f, false);
-
+	ensure(GetOwner()->HasAuthority());
+	RETURN_VALUE_IF_FALSE(GetOwner()->HasAuthority(), false);
+	
 	/**  Dont heal if we are Max health */
 	RETURN_VALUE_IF_TRUE(IsFullHealth() && DeltaHealth >= 0.f, false);
 
@@ -94,6 +92,8 @@ bool USAttributeComponent::Kill(AActor* Instigator)
 bool USAttributeComponent::ApplyRageChange(float DeltaRage, AActor* InstigatorActor)
 {
 	RETURN_VALUE_IF_TRUE(DeltaRage == 0.f, false);
+	ensure(GetOwner()->HasAuthority());
+	RETURN_VALUE_IF_FALSE(GetOwner()->HasAuthority(), false);
 	
 	const float OldRage = Rage;
 	
@@ -102,9 +102,20 @@ bool USAttributeComponent::ApplyRageChange(float DeltaRage, AActor* InstigatorAc
 
 	// THis is the real change
 	DeltaRage = OldRage - Rage;
+
+	/** Broadcast the event */
+	Multicast_RageChanged(InstigatorActor, Rage, DeltaRage);
 	
-	OnRageChanged.Broadcast(InstigatorActor, this, Rage, DeltaRage);
 	return DeltaRage != 0;
+}
+
+void USAttributeComponent::Multicast_HealthChanged_Implementation(AActor* Instigator, float NewHealth, float DeltaHealth)
+{
+	OnHealthChanged.Broadcast(Instigator, this, NewHealth, DeltaHealth);
+}
+void USAttributeComponent::Multicast_RageChanged_Implementation(AActor* Instigator, float NewRage, float DeltaRage)
+{
+	OnRageChanged.Broadcast(Instigator, this, NewRage, DeltaRage);
 }
 
 void USAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

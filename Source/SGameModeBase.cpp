@@ -15,7 +15,7 @@
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(
 	TEXT("su.SpawnBots"),
-	true,
+	false,
 	TEXT("Enable Spawning of bots"),
 	ECVF_Cheat);
 
@@ -82,7 +82,6 @@ void ASGameModeBase::SpawnBots()
 		if (AttributeComponent && AttributeComponent->IsAlive())
 		{
 			++NumberOfBots;
-
 		}
 	}
 

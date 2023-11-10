@@ -11,7 +11,7 @@ USActionComponent::USActionComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	SetIsReplicatedByDefault(true);
 	// ...
 }
 
@@ -31,7 +31,6 @@ void USActionComponent::BeginPlay()
 		AddAction(GetOwner(), ActionClass);
 	}
 }
-
 
 // Called every frame
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -76,6 +75,12 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, DebugMsg);
 			continue;
 		}
+
+		//Am I a client?
+		if(!GetOwner()->HasAuthority())
+		{
+			Server_StartAction(Instigator, ActionName);
+		}
 		
 		Action->StartAction(Instigator);
 		return true;
@@ -107,3 +112,7 @@ void USActionComponent::RemoveAction(USActionBase* ActionToRemove)
 	Actions.Remove(ActionToRemove);
 }
 
+void USActionComponent::Server_StartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
+}
