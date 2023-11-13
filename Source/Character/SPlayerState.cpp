@@ -109,7 +109,7 @@ void ASPlayerState::LoadPlayerState_Implementation(USSaveGame* SavedGame)
 {
 	RETURN_IF_NULL(SavedGame);
 
-	PlayerCredits = SavedGame->Credits;
+	AddCredits(SavedGame->Credits);
 }
 
 void ASPlayerState::SavePlayerState_Implementation(USSaveGame* SavedGame)

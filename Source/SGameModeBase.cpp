@@ -80,12 +80,12 @@ void ASGameModeBase::InitGame(const FString& MapName, const FString& Options, FS
 
 void ASGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
 	ASPlayerState* PlayerState = NewPlayer->GetPlayerState<ASPlayerState>();
-	RETURN_IF_NULL(PlayerState);
+	RETURN_IF_NULL_ENSURE(PlayerState);
 
 	PlayerState->LoadPlayerState(CurrentSavedGame);
+
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
 void ASGameModeBase::SpawnBots()
