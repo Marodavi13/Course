@@ -20,6 +20,8 @@ public:
 
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 
+	virtual void OnActorLoaded_Implementation() override;
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	
@@ -29,7 +31,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Mesh")
 	UStaticMeshComponent* UpperMesh;
 
-	UPROPERTY(Transient, Replicated, ReplicatedUsing = "OnRep_IsLidOpen")
+	UPROPERTY(Transient, SaveGame, Replicated, ReplicatedUsing = "OnRep_IsLidOpen")
 	bool bIsLidOpen;
 
 	UPROPERTY(EditAnywhere, Category="Interaction")

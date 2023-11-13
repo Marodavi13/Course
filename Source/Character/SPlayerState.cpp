@@ -104,3 +104,17 @@ void ASPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	
 	DOREPLIFETIME(ASPlayerState, PlayerCredits);
 }
+
+void ASPlayerState::LoadPlayerState_Implementation(USSaveGame* SavedGame)
+{
+	RETURN_IF_NULL(SavedGame);
+
+	PlayerCredits = SavedGame->Credits;
+}
+
+void ASPlayerState::SavePlayerState_Implementation(USSaveGame* SavedGame)
+{
+	RETURN_IF_NULL(SavedGame);
+
+	SavedGame->Credits = PlayerCredits;
+}

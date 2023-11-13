@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "SGameModeBase.h"
+#include "Core/SSaveGame.h"
 #include "GameFramework/PlayerState.h"
 #include "SPlayerState.generated.h"
 
@@ -52,6 +54,12 @@ public:
 	bool CanRemoveCredits(int32 RemovedCredits) const;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SavePlayerState(USSaveGame* SavedGame);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadPlayerState(USSaveGame* SavedGame);
 
 protected:
 	

@@ -6,3 +6,4 @@
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Course, "Course" );
 
 DEFINE_LOG_CATEGORY(LogSCredits);
+DEFINE_LOG_CATEGORY(LogSSaveGame);

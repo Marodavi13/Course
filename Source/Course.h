@@ -21,6 +21,7 @@
 #define RETURN_VALUE_IF_FALSE_ENSURE(Expression, Value)	if((Expression) == false)	{ ensure(false); return Value; }
 
 DECLARE_LOG_CATEGORY_EXTERN(LogSCredits, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogSSaveGame, Log, All);
 
 static void LogOnScreen(UObject* WorldContext, FString Msg, FColor Color = FColor::Green, float Duration = 5.f)
 {
