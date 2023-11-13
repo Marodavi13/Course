@@ -6,6 +6,17 @@
 #include "GameplayTagContainer.h"
 #include "SActionBase.generated.h"
 
+USTRUCT()
+struct FSActionRepData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bIsActive;
+
+	UPROPERTY()
+	AActor* Instigator;
+};
 class USActionComponent;
 /**
  * 
@@ -54,11 +65,11 @@ protected:
 	UPROPERTY(Transient, Replicated)
 	USActionComponent* OwningComponent;
 	
-	UPROPERTY(ReplicatedUsing="OnRep_IsActive")
-	bool bIsActive = false;
+	UPROPERTY(ReplicatedUsing="OnRep_Data")
+	FSActionRepData ReplicatedData;
 	
 	UFUNCTION()
-	void OnRep_IsActive();
+	void OnRep_Data();
 	
 	// Tags added to owning actor when activated
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")

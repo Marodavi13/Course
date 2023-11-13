@@ -44,8 +44,6 @@ bool USAttributeComponent::IsActorAlive(AActor* Actor)
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* InstigatorActor)
 {
 	RETURN_VALUE_IF_TRUE(!GetOwner()->CanBeDamaged() && DeltaHealth < 0.f, false);
-	ensure(GetOwner()->HasAuthority());
-	RETURN_VALUE_IF_FALSE(GetOwner()->HasAuthority(), false);
 	
 	/**  Dont heal if we are Max health */
 	RETURN_VALUE_IF_TRUE(IsFullHealth() && DeltaHealth >= 0.f, false);
@@ -57,17 +55,24 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* Instigat
 	}
 	
 	const float PreviousHealth = Health;
-	
-	/** Set the health and clamp it*/
-	Health += DeltaHealth;
-	Health = FMath::Clamp(Health, 0.f, MaxHealth);
+	const float NewHealth = FMath::Clamp(Health + DeltaHealth, 0.f, MaxHealth);
+	DeltaHealth = NewHealth - PreviousHealth;
 
-	DeltaHealth = Health - PreviousHealth;
-	/** Broadcast the event */
-	Multicast_HealthChanged(InstigatorActor, Health, DeltaHealth);
-
-	if (DeltaHealth < 0.f)
+	// Only server applies health changes
+	if (GetOwner()->HasAuthority())
 	{
+		/** Set the new clamped health */
+		Health = NewHealth;
+
+		/** Broadcast the event */
+		if (DeltaHealth != 0.f)
+		{
+			Multicast_HealthChanged(InstigatorActor, Health, DeltaHealth);
+		}
+
+		// Handle death and rage 
+		RETURN_VALUE_IF_FALSE(DeltaHealth < 0.f, DeltaHealth != 0.f);
+		
 		// Has died?
 		if (Health == 0.f)
 		{
@@ -81,6 +86,7 @@ bool USAttributeComponent::ApplyHealthChange(float DeltaHealth, AActor* Instigat
 			ApplyRageChange(-DeltaHealth * RagePerHealthLost, InstigatorActor);
 		}
 	}
+	
 	return DeltaHealth != 0.f;
 }
 

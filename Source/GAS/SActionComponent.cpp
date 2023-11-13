@@ -21,8 +21,6 @@ USActionComponent* USActionComponent::Get(const AActor* Owner)
 	return Owner ? Owner->FindComponentByClass<USActionComponent>() : nullptr;
 }
 
-
-// Called when the game starts
 void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -33,25 +31,18 @@ void USActionComponent::BeginPlay()
 		{
 			AddAction(GetOwner(), ActionClass);
 		}
-	}}
+	}
+}
 
-// Called every frame
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	// const FString DebugMessage = GetNameSafe(GetOwner()) + TEXT(": ") + ActiveGameplayTags.ToStringSimple();
-	// GEngine->AddOnScreenDebugMessage(-1, DeltaTime, FColor::Green, DebugMessage);
-
 	for (USActionBase* Action: Actions)
 	{
-		FColor Color = Action->IsActive() ? FColor::Blue : FColor::White;
+		FColor Color = Action->IsActive() ? FColor::Green : FColor::Red;
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action %s"),	*GetNameSafe(GetOwner()), *GetNameSafe(Action));
 		
-		FString ActionMsg = FString::Printf(TEXT("[%s] Action %s | IsActive: %s | Outer: %s"),
-			*GetNameSafe(GetOwner()),
-			*Action->ActionName.ToString(),
-			Action->IsActive()? TEXT("true") : TEXT("false"),
-			*GetNameSafe(Action->GetOuter()));
 		LogOnScreen(this, ActionMsg, Color, 0.0f);
 	}
 }
@@ -61,6 +52,12 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USActionBase> 
 	ensure(AddedActionClass);
 	RETURN_IF_NULL(AddedActionClass);
 
+	if(!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client attempting to add action [%s]"), *GetNameSafe(AddedActionClass))
+		return;
+	}
+	
 	// Instanciate the action
 	USActionBase* AddedAction = NewObject<USActionBase>(GetOwner(), AddedActionClass);
 	RETURN_IF_NULL(AddedAction);
@@ -114,8 +111,15 @@ bool USActionComponent::StopActionByName(AActor* Instigator, FName ActionName)
 		{
 			continue;
 		}
+
+		//Am I a client?
+		if(!GetOwner()->HasAuthority())
+		{
+			Server_StopAction(Instigator, ActionName);
+		}
 		
 		Action->StopAction(Instigator);
+		
 		return true;
 	}
 	return false;
@@ -129,16 +133,21 @@ void USActionComponent::RemoveAction(USActionBase* ActionToRemove)
 	Actions.Remove(ActionToRemove);
 }
 
-void USActionComponent::Server_StartAction_Implementation(AActor* Instigator, FName ActionName)
-{
-	StartActionByName(Instigator, ActionName);
-}
-
 void USActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(USActionComponent, Actions);
+}
+
+void USActionComponent::Server_StartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
+}
+
+void USActionComponent::Server_StopAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StopActionByName(Instigator, ActionName);
 }
 
 bool USActionComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)

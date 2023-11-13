@@ -51,4 +51,7 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_StartAction(AActor* Instigator, FName ActionName);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_StopAction(AActor* Instigator, FName ActionName);
 };

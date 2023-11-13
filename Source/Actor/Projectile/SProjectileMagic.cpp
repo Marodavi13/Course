@@ -42,10 +42,11 @@ void ASProjectileMagic::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComp
 	
 	if (USUtils::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 	{
-		if(ActionComponent && OnDamageEffect)
+		if (ActionComponent && OnDamageEffect && HasAuthority())
 		{
 			ActionComponent->AddAction(GetInstigator(), OnDamageEffect);
 		}
+		
 		Destroy();
 	}
 }

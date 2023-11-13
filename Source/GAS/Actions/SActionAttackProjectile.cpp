@@ -24,6 +24,8 @@ void USActionAttackProjectile::StartAction_Implementation(AActor* Instigator)
 	CharacterInstigator->PlayAnimMontage(AttackAnimation);
 	UGameplayStatics::SpawnEmitterAttached(LaunchProjectileEffect,CharacterInstigator->GetMesh(), AttackBoneName);
 
+	//We only spawn the projectile in the server
+	RETURN_IF_FALSE(CharacterInstigator->HasAuthority());
 	// Set the timer for the anim delay
 	const FTimerDelegate Delegate  = FTimerDelegate::CreateUObject(this, &USActionAttackProjectile::OnAttackDelayElapsed,
 																	     CharacterInstigator);

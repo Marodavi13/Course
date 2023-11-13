@@ -5,26 +5,26 @@
 
 void USActionBase::StartAction_Implementation(AActor* Instigator)
 {
-	LogOnScreen(this, FString::Printf(TEXT("Started Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator)), FColor::Green);
-	//UE_LOG(LogTemp, Log, TEXT("Started Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator));
+	//LogOnScreen(this, FString::Printf(TEXT("Started Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator)), FColor::Green);
+	UE_LOG(LogTemp, Log, TEXT("Started Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator));
 
 	USActionComponent* ActionComponent = GetOwningComponent();
 	ActionComponent->ActiveGameplayTags.AppendTags(GrantsTags);
 
-	bIsActive = true;
+	ReplicatedData.bIsActive = true;
+	ReplicatedData.Instigator = Instigator;
 }
 
 void USActionBase::StopAction_Implementation(AActor* Instigator)
 {
-	LogOnScreen(this, FString::Printf(TEXT("Stopped Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator)), FColor::White);
-	//UE_LOG(LogTemp, Log, TEXT("Stopped Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator));
+	//LogOnScreen(this, FString::Printf(TEXT("Stopped Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator)), FColor::White);
+	UE_LOG(LogTemp, Log, TEXT("Stopped Action %s by %s"), *GetNameSafe(this), *GetNameSafe(Instigator));
 
-	//ensureAlways(IsActive());
-	
 	USActionComponent* ActionComponent = GetOwningComponent();
 	ActionComponent->ActiveGameplayTags.RemoveTags(GrantsTags);
 
-	bIsActive = false;
+	ReplicatedData.bIsActive = false;
+	ReplicatedData.Instigator = Instigator;
 }
 
 bool USActionBase::CanStart_Implementation(AActor* Instigator) const
@@ -51,18 +51,19 @@ void USActionBase::Initialize(USActionComponent* NewOwningComponent)
 
 bool USActionBase::IsActive() const
 {
-	return bIsActive;
+	return ReplicatedData.bIsActive;
 }
 
 UWorld* USActionBase::GetWorld() const
 {
-	AActor* Actor = Cast<AActor>(GetOuter());
-	if(Actor)
+	const AActor* Actor = Cast<AActor>(GetOuter());
+	if (Actor)
 	{
 		return Actor->GetWorld();
 	}
+	
 	const UActorComponent* OuterComponent = Cast<UActorComponent>(GetOuter());
-	if(OuterComponent)
+	if (OuterComponent)
 	{
 		return OuterComponent->GetWorld();
 	}
@@ -70,15 +71,15 @@ UWorld* USActionBase::GetWorld() const
 	return nullptr;
 }
 
-void USActionBase::OnRep_IsActive()
+void USActionBase::OnRep_Data()
 {
-	if(bIsActive)
+	if (ReplicatedData.bIsActive)
 	{
-		StartAction(nullptr);
+		StartAction(ReplicatedData.Instigator);
 	}
 	else
 	{
-		StopAction(nullptr);
+		StopAction(ReplicatedData.Instigator);
 	}
 }
 
@@ -91,7 +92,7 @@ void USActionBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(USActionBase, bIsActive);
+	DOREPLIFETIME(USActionBase, ReplicatedData);
 	DOREPLIFETIME(USActionBase, OwningComponent);
 }
 

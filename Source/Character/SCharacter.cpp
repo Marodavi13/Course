@@ -115,6 +115,7 @@ void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent*
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		DisableInput(PlayerController);
 		SetActorEnableCollision(false);
+		SetLifeSpan(1.f);
 	}
 }
 
