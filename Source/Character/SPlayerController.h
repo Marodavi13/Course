@@ -19,4 +19,15 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="BeginPlayingState")
 	void BPI_BeginPlayingState();
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY(Transient, SkipSerialization)
+	UUserWidget* PauseMenu;
+
+	UFUNCTION(BlueprintCallable, Category="")
+	void TogglePause();
+
+	virtual void SetupInputComponent() override;
 };
