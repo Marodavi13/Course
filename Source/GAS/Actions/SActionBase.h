@@ -61,12 +61,20 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	
 protected:
+	
 	UPROPERTY(Transient, Replicated)
 	USActionComponent* OwningComponent;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Action")
+	float TimeStarted;
 	
 	UPROPERTY(ReplicatedUsing="OnRep_Data")
 	FSActionRepData ReplicatedData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UI)
+	UTexture2D* Icon;
 	
 	UFUNCTION()
 	void OnRep_Data();

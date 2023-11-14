@@ -13,6 +13,9 @@ void USActionBase::StartAction_Implementation(AActor* Instigator)
 
 	ReplicatedData.bIsActive = true;
 	ReplicatedData.Instigator = Instigator;
+	TimeStarted = GetWorld()->GetTimeSeconds();
+
+	ActionComponent->OnActionStarted.Broadcast(ActionComponent, this);
 }
 
 void USActionBase::StopAction_Implementation(AActor* Instigator)
@@ -25,6 +28,8 @@ void USActionBase::StopAction_Implementation(AActor* Instigator)
 
 	ReplicatedData.bIsActive = false;
 	ReplicatedData.Instigator = Instigator;
+
+	ActionComponent->OnActionStopped.Broadcast(ActionComponent, this);
 }
 
 bool USActionBase::CanStart_Implementation(AActor* Instigator) const

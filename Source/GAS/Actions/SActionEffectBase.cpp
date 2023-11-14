@@ -57,3 +57,8 @@ void USActionEffectBase::StopAction_Implementation(AActor* Instigator)
 	Component->RemoveAction(this);
 	
 }
+
+float USActionEffectBase::GetTimeRemaining() const
+{
+	return (TimeStarted + Duration) - GetWorld()->GetTimeSeconds();
+}
