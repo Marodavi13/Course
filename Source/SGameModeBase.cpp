@@ -95,7 +95,7 @@ void ASGameModeBase::SpawnBots()
 	RETURN_IF_NULL(SpawnBotQuery);
 	
 	int32 NumberOfBots = 0;
-	for(TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
+	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
 	{
 		ASAICharacter* Bot = *It;
 		USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Bot);
