@@ -67,7 +67,7 @@ protected:
 	UPROPERTY(Transient, Replicated)
 	USActionComponent* OwningComponent;
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category = "Action")
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category = "Action")
 	float TimeStarted;
 	
 	UPROPERTY(ReplicatedUsing="OnRep_Data")

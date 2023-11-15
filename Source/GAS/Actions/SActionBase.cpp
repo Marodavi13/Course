@@ -13,7 +13,11 @@ void USActionBase::StartAction_Implementation(AActor* Instigator)
 
 	ReplicatedData.bIsActive = true;
 	ReplicatedData.Instigator = Instigator;
-	TimeStarted = GetWorld()->GetTimeSeconds();
+
+	if (GetOwningComponent()->GetOwner()->HasAuthority())
+	{
+		TimeStarted = GetWorld()->GetTimeSeconds();
+	}
 
 	ActionComponent->OnActionStarted.Broadcast(ActionComponent, this);
 }
@@ -99,5 +103,6 @@ void USActionBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 	DOREPLIFETIME(USActionBase, ReplicatedData);
 	DOREPLIFETIME(USActionBase, OwningComponent);
+	DOREPLIFETIME(USActionBase, TimeStarted);
 }
 
