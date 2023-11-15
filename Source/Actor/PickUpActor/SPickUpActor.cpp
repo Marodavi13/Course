@@ -13,6 +13,12 @@ ASPickUpActor::ASPickUpActor()
 	bReplicates = true;
 }
 
+FText ASPickUpActor::GetInteractMessage_Implementation(APawn* InstigatorPawn) const
+{
+	return FText::GetEmpty();
+}
+
+
 // Called when the game starts or when spawned
 void ASPickUpActor::BeginPlay()
 {

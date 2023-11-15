@@ -17,6 +17,9 @@ public:
 	ASPickUpActor();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual FText GetInteractMessage_Implementation(APawn* InstigatorPawn) const override;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

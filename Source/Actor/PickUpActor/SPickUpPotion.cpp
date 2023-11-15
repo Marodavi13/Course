@@ -7,6 +7,7 @@
 #include "Character/SPlayerState.h"
 #include "Character/Component/SAttributeComponent.h"
 
+#define LOCTEXT_NAMESPACE "InteractableActors"
 // Sets default values
 ASPickUpPotion::ASPickUpPotion()
 {
@@ -39,3 +40,19 @@ void ASPickUpPotion::Interact_Implementation(APawn* InstigatorPawn)
 		HideAndCooldownPickUp();
 	}
 }
+
+FText ASPickUpPotion::GetInteractMessage_Implementation(APawn* InstigatorPawn) const
+{
+	USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(InstigatorPawn);
+	RETURN_VALUE_IF_NULL(AttributeComponent, FText::GetEmpty());
+
+	if(AttributeComponent->IsFullHealth())
+	{
+		return LOCTEXT("HealthPotion_FullHealthWarning", "Already at full health");
+	}
+
+	return FText::Format(LOCTEXT("HealthPotion_InteractMessage", "Cost: {0} Credits, restores {1} HP"),
+		CreditsToInteract, HealAmount);
+}
+
+#undef LOCTEXT_NAMESPACE

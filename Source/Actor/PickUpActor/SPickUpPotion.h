@@ -17,6 +17,7 @@ public:
 
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
 
+	virtual FText GetInteractMessage_Implementation(APawn* InstigatorPawn) const override;
 protected:
 	
 	UPROPERTY(EditAnywhere, Category= "Heal")

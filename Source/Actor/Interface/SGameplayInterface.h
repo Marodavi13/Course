@@ -28,4 +28,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void Interact(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	FText GetInteractMessage(APawn* InstigatorPawn) const;
 };
