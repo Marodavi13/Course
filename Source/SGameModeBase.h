@@ -1,5 +1,4 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,11 +7,30 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameModeBase.generated.h"
 
+class USBotData;
 class USSaveGame;
 class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
 class UCurveFloat;
 
+USTRUCT(BlueprintType)
+struct FSBotInfoRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USBotData* BotData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Weight = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float SpawnCost = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 KillReward = 15.f;
+	
+};
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilledDelegate, AActor*, KilledActor, AActor*, KillInstigator);
 UCLASS()
@@ -66,6 +84,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category="AI")
 	UEnvQuery* SpawnBotQuery;
+
+	UPROPERTY(EditAnywhere, Category="AI")
+	UDataTable* BotTable;
 
 	UPROPERTY(EditAnywhere, Category="AI")
 	TSubclassOf<AActor> BotClass;

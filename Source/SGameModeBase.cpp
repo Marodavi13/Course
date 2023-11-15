@@ -7,6 +7,7 @@
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
 #include "AI/SAICharacter.h"
+#include "AI/Data/SBotData.h"
 #include "Character/SCharacter.h"
 #include "Character/SPlayerState.h"
 #include "Character/Component/SAttributeComponent.h"
@@ -139,14 +140,25 @@ void ASGameModeBase::OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* Quer
 	}
 		
 	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
-	if (Locations.Num())
+	if (Locations.IsEmpty())
 	{
-		GetWorld()->SpawnActor<AActor>(BotClass, Locations[0], FRotator::ZeroRotator);
-
-		DrawDebugLine(GetWorld(), Locations[0], Locations[0] + FVector::UpVector * 500.f, FColor::Green,
-		false, 10.f);
+		UE_LOG(LogTemp, Warning, TEXT("Spawn bot EQS Query has no locations!"));
+		return;
 	}
 	
+	RETURN_IF_NULL_ENSURE(BotTable)
+	
+	TArray<FSBotInfoRow*> OutEnemies;
+	BotTable->GetAllRows(TEXT("Spawn Enemy"), OutEnemies);
+
+	int32 RandomIndex = FMath::RandRange(0, OutEnemies.Num() - 1);
+	FSBotInfoRow* SelectedEnemy = OutEnemies[RandomIndex];
+
+	GetWorld()->SpawnActor<AActor>(SelectedEnemy->BotData->BotClass, Locations[0], FRotator::ZeroRotator);
+
+	DrawDebugLine(GetWorld(), Locations[0], Locations[0] + FVector::UpVector * 500.f, FColor::Green,
+	false, 10.f);
+
 }
 
 void ASGameModeBase::OnCoinPickedUp(AActor* Actor)
