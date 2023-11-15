@@ -12,10 +12,10 @@ struct FSActionRepData
 	GENERATED_BODY()
 
 	UPROPERTY()
-	bool bIsActive;
+	bool bIsActive = false;
 
 	UPROPERTY()
-	AActor* Instigator;
+	AActor* Instigator = nullptr;
 };
 class USActionComponent;
 /**
