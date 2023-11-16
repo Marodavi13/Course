@@ -33,6 +33,23 @@ void USActionComponent::BeginPlay()
 	}
 }
 
+void USActionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	//Copy to avoid check about removing element during for loop iteration
+	TArray<USActionBase*> CopiedActions = Actions;
+	for (USActionBase* Action : CopiedActions)
+	{
+		if(Action && Action->IsActive())
+		{
+			Action->StopAction(GetOwner());
+		}
+	}
+	
+	Super::EndPlay(EndPlayReason);
+
+	
+}
+
 void USActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -95,6 +112,9 @@ bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 		{
 			Server_StartAction(Instigator, ActionName);
 		}
+
+		//UE Insights Bookmark
+		TRACE_BOOKMARK(TEXT("StartAction::%s"), *GetNameSafe(Action));
 		
 		Action->StartAction(Instigator);
 		return true;

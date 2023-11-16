@@ -74,10 +74,19 @@ void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 	OnActorKilledDelegate.Broadcast(KilledActor, KillInstigator);
 }
 
+static FString SlotName = TEXT("SavedGame");
+
 void ASGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
+	FString SelectedSaveSlot = UGameplayStatics::ParseOption(Options, TEXT("SaveGame"));
+
+	if(SelectedSaveSlot.Len() > 0)
+	{
+		SlotName = SelectedSaveSlot;
+	}
+	
 	LoadGame();
 }
 
@@ -232,8 +241,6 @@ void ASGameModeBase::DisableAI()
 
 	CVarSpawnBots->SetWithCurrentPriority(false);
 }
-
-static FString SlotName = TEXT("SavedGame");
 
 void ASGameModeBase::EnableAI()
 {
