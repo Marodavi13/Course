@@ -19,7 +19,7 @@ struct FSBotInfoRow : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	USBotData* BotData;
+	FPrimaryAssetId BotID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Weight = 1.f;
@@ -106,6 +106,9 @@ protected:
 
 	UFUNCTION()
 	void RespawnPlayerElapsed(AController* RespawningController);
+
+	UFUNCTION()
+	void OnBotLoaded(FPrimaryAssetId PrimaryAssetId, FVector SpawnLocation);
 
 	UFUNCTION()
 	void OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type Arg);

@@ -74,7 +74,7 @@ protected:
 	FSActionRepData ReplicatedData;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = UI)
-	UTexture2D* Icon;
+	TSoftObjectPtr<UTexture2D> Icon;
 	
 	UFUNCTION()
 	void OnRep_Data();

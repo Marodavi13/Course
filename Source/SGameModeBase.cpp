@@ -6,12 +6,14 @@
 #include "Course.h"
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
+#include "SkeletalDebugRendering.h"
 #include "AI/SAICharacter.h"
 #include "AI/Data/SBotData.h"
 #include "Character/SCharacter.h"
 #include "Character/SPlayerState.h"
 #include "Character/Component/SAttributeComponent.h"
 #include "Core/SSaveGame.h"
+#include "Engine/AssetManager.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -34,7 +36,7 @@ void ASGameModeBase::StartPlay()
 
 	GetWorldTimerManager().SetTimer(SpawnBotsHandle, this, &ASGameModeBase::SpawnBots, SpawnBotsDelay, true);
 
-	for(int32 i = 0; i < InitialCoins; ++i)
+	for (int32 i = 0; i < InitialCoins; ++i)
 	{
 		SpawnCoin();
 	}
@@ -44,7 +46,7 @@ void ASGameModeBase::StartPlay()
 
 void ASGameModeBase::KillAllAI()
 {
-	for(TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
+	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
 	{
 		ASAICharacter* Bot = *It;
 		USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Bot);
@@ -131,6 +133,7 @@ void ASGameModeBase::RespawnPlayerElapsed(AController* RespawningController)
 	RestartPlayer(RespawningController);
 }
 
+
 void ASGameModeBase::OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus)
 {
 	if (QueryStatus != EEnvQueryStatus::Success)
@@ -154,11 +157,36 @@ void ASGameModeBase::OnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* Quer
 	int32 RandomIndex = FMath::RandRange(0, OutEnemies.Num() - 1);
 	FSBotInfoRow* SelectedEnemy = OutEnemies[RandomIndex];
 
-	GetWorld()->SpawnActor<AActor>(SelectedEnemy->BotData->BotClass, Locations[0], FRotator::ZeroRotator);
+	UAssetManager* Manager = UAssetManager::GetIfInitialized();
+	RETURN_IF_NULL_ENSURE(Manager);
 
-	DrawDebugLine(GetWorld(), Locations[0], Locations[0] + FVector::UpVector * 500.f, FColor::Green,
-	false, 10.f);
+	TArray<FName> Bundles;
+	FStreamableDelegate LoadDelegate = FStreamableDelegate::CreateUObject(this, &ASGameModeBase::OnBotLoaded, SelectedEnemy->BotID,Locations[0]);
+	Manager->LoadPrimaryAsset(SelectedEnemy->BotID, Bundles, LoadDelegate);
+	LogOnScreen(this, TEXT("Loading Bot..."));
 
+}
+
+void ASGameModeBase::OnBotLoaded(FPrimaryAssetId PrimaryAssetId, FVector SpawnLocation)
+{
+	LogOnScreen(this, TEXT("Bot Loaded!"));
+
+	UAssetManager* Manager = UAssetManager::GetIfInitialized();
+	RETURN_IF_NULL_ENSURE(Manager);
+
+	USBotData* BotData = Manager->GetPrimaryAssetObject<USBotData>(PrimaryAssetId);
+	AActor* NewBot = GetWorld()->SpawnActor<AActor>(BotData->BotClass, SpawnLocation, FRotator::ZeroRotator);
+	RETURN_IF_NULL_ENSURE(NewBot);
+
+	LogOnScreen(this, TEXT("Bot Spawned!"));
+
+	USActionComponent* ActionComponent = USActionComponent::Get(NewBot);
+	RETURN_IF_NULL(ActionComponent);
+	
+	for (auto Action : BotData->Actions)
+	{
+		ActionComponent->AddAction(NewBot, Action);
+	}
 }
 
 void ASGameModeBase::OnCoinPickedUp(AActor* Actor)
@@ -196,7 +224,7 @@ void ASGameModeBase::DisableAI()
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(this, BotClass, OutActors);
 
-	for(AActor* Actor : OutActors)
+	for (AActor* Actor : OutActors)
 	{
 		USAttributeComponent* AttributeComp = USAttributeComponent::GetAttributes(Actor);
 		AttributeComp->Kill(this);
@@ -215,10 +243,10 @@ void ASGameModeBase::EnableAI()
 
 void ASGameModeBase::SaveGame()
 {
-	for(APlayerState* PS : GameState->PlayerArray)
+	for (APlayerState* PS : GameState->PlayerArray)
 	{
 		ASPlayerState* CurrentPlayerState = Cast<ASPlayerState>(PS);
-		if(CurrentPlayerState)
+		if (CurrentPlayerState)
 		{
 			CurrentPlayerState->SavePlayerState(CurrentSavedGame);
 			// SP only by now
@@ -257,7 +285,7 @@ void ASGameModeBase::SaveGame()
 
 void ASGameModeBase::LoadGame()
 {
-	if(UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
 	{
 		CurrentSavedGame = Cast<USSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
 		if (!CurrentSavedGame)
@@ -276,9 +304,9 @@ void ASGameModeBase::LoadGame()
 				continue;
 			}
 
-			for(const FActorSaveData& ActorData : CurrentSavedGame->SavedActors)
+			for (const FActorSaveData& ActorData : CurrentSavedGame->SavedActors)
 			{
-				if(ActorData.ActorName != Actor->GetName())
+				if (ActorData.ActorName != Actor->GetName())
 				{
 					continue;
 				}
