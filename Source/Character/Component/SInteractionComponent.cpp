@@ -1,15 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Component/SInteractionComponent.h"
-
 #include "Course.h"
-#include "ToolContextInterfaces.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Actor/Interface/SGameplayInterface.h"
 #include "Blueprint/UserWidget.h"
-#include "Camera/CameraComponent.h"
-#include "Curves/CurveLinearColor.h"
 #include "UI/SWorldUserWidget.h"
 
 static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(

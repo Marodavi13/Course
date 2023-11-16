@@ -23,6 +23,8 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogSCredits, Log, All);
 DECLARE_LOG_CATEGORY_EXTERN(LogSSaveGame, Log, All);
 
+DECLARE_STATS_GROUP(TEXT("STANFORD_Game"), STATGROUP_STANFORD, STATCAT_Advanced);
+
 static void LogOnScreen(UObject* WorldContext, FString Msg, FColor Color = FColor::Green, float Duration = 5.f)
 {
 	RETURN_IF_NULL_ENSURE(WorldContext);

@@ -1,10 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/SActionComponent.h"
 #include "Course.h"
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
+
+DECLARE_CYCLE_STAT(TEXT("StartActionByName"), STAT_StartActionByName, STATGROUP_STANFORD);
 
 // Sets default values for this component's properties
 USActionComponent::USActionComponent()
@@ -74,6 +73,7 @@ void USActionComponent::AddAction(AActor* Instigator, TSubclassOf<USActionBase> 
 
 bool USActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 {
+	SCOPE_CYCLE_COUNTER(STAT_StartActionByName);
 	for(USActionBase* Action: Actions)
 	{
 		// I action not valid or not matching name, continue

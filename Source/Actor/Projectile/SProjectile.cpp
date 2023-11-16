@@ -3,6 +3,7 @@
 
 #include "SProjectile.h"
 
+#include "Course.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -50,10 +51,7 @@ void ASProjectile::PostInitializeComponents()
 
 void ASProjectile::PlayExplodeEffects() const
 {
-	if (!ensure(!IsPendingKill()))
-	{
-		return;
-	}
+	RETURN_IF_FALSE_ENSURE(IsValid(this));
 	
 	if (ImpactVFX)
 	{
