@@ -57,16 +57,11 @@ public:
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
-	
-	UFUNCTION(BlueprintCallable, Category="SaveGame")
-	void SaveGame();
 
-	void LoadGame();
-	
 protected:
 
 	UPROPERTY(EditAnywhere, Category="Credits")
-	UEnvQuery* SpawnCoinQuery;
+	UEnvQuery* SpawnCoinQuery = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="Credits")
 	int32 InitialCoins = 4;
@@ -83,23 +78,20 @@ protected:
 	TArray<TWeakObjectPtr<ASPickUpCoin>> CoinInstances;
 	
 	UPROPERTY(EditAnywhere, Category="AI")
-	UEnvQuery* SpawnBotQuery;
+	UEnvQuery* SpawnBotQuery = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="AI")
-	UDataTable* BotTable;
+	UDataTable* BotTable = nullptr;
 
 	UPROPERTY(EditAnywhere, Category="AI")
 	TSubclassOf<AActor> BotClass;
 
 	UPROPERTY(EditAnywhere, Category="AI")
-	UCurveFloat* DifficultyCurve;
+	UCurveFloat* DifficultyCurve = nullptr;
 	
 	UPROPERTY(EditAnywhere, Category="AI")
 	float SpawnBotsDelay;
 	
-	UPROPERTY()
-	USSaveGame* CurrentSavedGame;
-
 	FTimerHandle SpawnBotsHandle;
 
 	virtual void SpawnBots();

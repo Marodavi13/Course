@@ -6,18 +6,15 @@
 #include "Course.h"
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
-#include "SkeletalDebugRendering.h"
 #include "AI/SAICharacter.h"
 #include "AI/Data/SBotData.h"
 #include "Character/SCharacter.h"
-#include "Character/SPlayerState.h"
 #include "Character/Component/SAttributeComponent.h"
-#include "Core/SSaveGame.h"
 #include "Engine/AssetManager.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Subsystem/SSaveGameSubsystem.h"
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(
 	TEXT("su.SpawnBots"),
@@ -59,7 +56,7 @@ void ASGameModeBase::KillAllAI()
 
 void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 {
-	ASCharacter* Player = Cast<ASCharacter>(KilledActor);
+	const ASCharacter* Player = Cast<ASCharacter>(KilledActor);
 	if (Player)
 	{
 		FTimerHandle RespawnHandle;
@@ -67,35 +64,26 @@ void ASGameModeBase::OnActorKilled(AActor* KilledActor, AActor* KillInstigator)
 		Delegate.BindUObject(this, &ASGameModeBase::RespawnPlayerElapsed, Player->GetController());
 
 		float RespawnDelay = 2.f;
-		UE_LOG(LogTemp, Log, TEXT("Respawning character %s in %i seconds"), *GetNameSafe(Player), RespawnDelay);
+		UE_LOG(LogTemp, Log, TEXT("Respawning character %s in %.2f seconds"), *GetNameSafe(Player), RespawnDelay);
 		GetWorldTimerManager().SetTimer(RespawnHandle, Delegate, RespawnDelay, false);
 	}
 
 	OnActorKilledDelegate.Broadcast(KilledActor, KillInstigator);
 }
 
-static FString SlotName = TEXT("SavedGame");
+
 
 void ASGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	Super::InitGame(MapName, Options, ErrorMessage);
 
 	FString SelectedSaveSlot = UGameplayStatics::ParseOption(Options, TEXT("SaveGame"));
-
-	if(SelectedSaveSlot.Len() > 0)
-	{
-		SlotName = SelectedSaveSlot;
-	}
-	
-	LoadGame();
+	GetGameInstance()->GetSubsystem<USSaveGameSubsystem>()->LoadGame(SelectedSaveSlot);
 }
 
 void ASGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	ASPlayerState* PlayerState = NewPlayer->GetPlayerState<ASPlayerState>();
-	RETURN_IF_NULL_ENSURE(PlayerState);
-
-	PlayerState->LoadPlayerState(CurrentSavedGame);
+	GetGameInstance()->GetSubsystem<USSaveGameSubsystem>()->HandleStartingNewPlayer(NewPlayer);
 
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
@@ -110,7 +98,7 @@ void ASGameModeBase::SpawnBots()
 	for (TActorIterator<ASAICharacter> It(GetWorld()); It; ++It)
 	{
 		ASAICharacter* Bot = *It;
-		USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Bot);
+		const USAttributeComponent* AttributeComponent = USAttributeComponent::GetAttributes(Bot);
 		if (AttributeComponent && AttributeComponent->IsAlive())
 		{
 			++NumberOfBots;
@@ -127,7 +115,7 @@ void ASGameModeBase::SpawnBots()
 
 	if (NumberOfBots >= MaxBotCount)
 	{
-		UE_LOG(LogTemp, Log, TEXT("There are too many anemies. Skipping bot spawn"), NumberOfBots);
+		UE_LOG(LogTemp, Log, TEXT("There are too many enemies(%i). Skipping bot spawn"), NumberOfBots);
 		return;
 	}
 	
@@ -180,7 +168,7 @@ void ASGameModeBase::OnBotLoaded(FPrimaryAssetId PrimaryAssetId, FVector SpawnLo
 {
 	LogOnScreen(this, TEXT("Bot Loaded!"));
 
-	UAssetManager* Manager = UAssetManager::GetIfInitialized();
+	const UAssetManager* Manager = UAssetManager::GetIfInitialized();
 	RETURN_IF_NULL_ENSURE(Manager);
 
 	USBotData* BotData = Manager->GetPrimaryAssetObject<USBotData>(PrimaryAssetId);
@@ -192,7 +180,7 @@ void ASGameModeBase::OnBotLoaded(FPrimaryAssetId PrimaryAssetId, FVector SpawnLo
 	USActionComponent* ActionComponent = USActionComponent::Get(NewBot);
 	RETURN_IF_NULL(ActionComponent);
 	
-	for (auto Action : BotData->Actions)
+	for (const auto Action : BotData->Actions)
 	{
 		ActionComponent->AddAction(NewBot, Action);
 	}
@@ -245,98 +233,4 @@ void ASGameModeBase::DisableAI()
 void ASGameModeBase::EnableAI()
 {
 	CVarSpawnBots->SetWithCurrentPriority(true);
-}
-
-
-void ASGameModeBase::SaveGame()
-{
-	for (APlayerState* PS : GameState->PlayerArray)
-	{
-		ASPlayerState* CurrentPlayerState = Cast<ASPlayerState>(PS);
-		if (CurrentPlayerState)
-		{
-			CurrentPlayerState->SavePlayerState(CurrentSavedGame);
-			// SP only by now
-			break;
-		}
-	}
-
-	CurrentSavedGame->SavedActors.Empty();
-	
-	for (FActorIterator It(GetWorld()); It; ++It)
-	{
-		AActor* Actor = *It;
-		if (!Actor->Implements<USGameplayInterface>())
-		{
-			continue;
-		}
-
-		FActorSaveData NewData;
-		NewData.ActorName = Actor->GetName();
-		NewData.ActorTransform = Actor->GetTransform();
-
-		// Pass the array to fill with data from actor
-		FMemoryWriter MemWriter(NewData.ByteData);
-		FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
-
-		//Find only variable with UPROPERTY SaveGame
-		Ar.ArIsSaveGame = true;
-
-		//Converts these UPROPERTIES into bin array 
-		Actor->Serialize(Ar);
-		CurrentSavedGame->SavedActors.Add(NewData);
-	}
-	
-	UGameplayStatics::SaveGameToSlot(CurrentSavedGame, SlotName, 0);
-}
-
-void ASGameModeBase::LoadGame()
-{
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
-	{
-		CurrentSavedGame = Cast<USSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
-		if (!CurrentSavedGame)
-		{
-			UE_LOG(LogSSaveGame, Warning, TEXT("Failed to load Save Game Data"));
-			return;
-		}
-
-		UE_LOG(LogSSaveGame, Log, TEXT("Loaded Save Game Data"));
-
-		for (FActorIterator It(GetWorld()); It; ++It)
-		{
-			AActor* Actor = *It;
-			if (!Actor->Implements<USGameplayInterface>())
-			{
-				continue;
-			}
-
-			for (const FActorSaveData& ActorData : CurrentSavedGame->SavedActors)
-			{
-				if (ActorData.ActorName != Actor->GetName())
-				{
-					continue;
-				}
-
-				Actor->SetActorTransform(ActorData.ActorTransform);
-
-				FMemoryReader MemReader(ActorData.ByteData);
-				FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
-
-				Ar.ArIsSaveGame = true;
-
-				//Converts bin array back to actor's variables
-				Actor->Serialize(Ar);
-				ISGameplayInterface::Execute_OnActorLoaded(Actor);
-				break;
-			}
-		}
-	}
-	else
-	{
-		CurrentSavedGame = Cast<USSaveGame>(UGameplayStatics::CreateSaveGameObject(USSaveGame::StaticClass()));
-		UE_LOG(LogSSaveGame, Log, TEXT("Created new Save Game Data"));
-	}
-
-
 }
